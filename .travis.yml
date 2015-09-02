@@ -33,4 +33,6 @@ before_script:
   - cp ../.coveragerc .
 script:
   - coverage run -m nose.core -v qt_binder
-  - coverage report
+after_success:
+  - pip install codecov
+  - codecov
