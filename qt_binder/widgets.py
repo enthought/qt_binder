@@ -439,6 +439,17 @@ class RangeSlider(Composite):
     _high_label = Any()
     _from_text_func = Callable(int)
 
+    def __init__(self, *args, **traits):
+        # Make sure that a `slider` argument gets assigned before anything else
+        # because it will affect what range can be accepted.
+        if 'slider' in traits:
+            slider = traits.pop('slider')
+            super(RangeSlider, self).__init__()
+            self.slider = slider
+            self.trait_set(**traits)
+        else:
+            super(RangeSlider, self).__init__(*args, **traits)
+
     def construct(self):
         self.slider.construct()
         self.field.construct()
