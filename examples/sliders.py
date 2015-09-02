@@ -50,7 +50,7 @@ class Model(HasTraits):
             'int_slider.value := object.int_value',
             'int_text.text << str(object.int_value)',
             'float_slider.value := object.float_value',
-            'float_text.text << str(object.float_value)',
+            'float_text.text << u"{:0.2f}".format(object.float_value)',
             'log_slider.value := object.log_value',
             'log_text.text << u"{:0.4f}".format(object.log_value)',
         ),
