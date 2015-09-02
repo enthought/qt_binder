@@ -1,0 +1,18 @@
+# Swap files.
+.*.swp
+.*.swo
+*~
+
+*.pyc
+*.pyo
+*.so
+*.o
+*.a
+
+.coverage
+htmlcov/
+
+*.egg-info/
+build/
+dist/
+docs/build/

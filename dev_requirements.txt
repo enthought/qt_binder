@@ -1,0 +1,6 @@
+six
+flake8
+nose
+coverage
+traits
+git+http://github.com/enthought/traitsui.git#egg=traitsui
