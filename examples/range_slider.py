@@ -37,14 +37,19 @@ class Model(HasTraits):
         traits_view = View(
             Bound(
                 FormLayout(
-                    (u'Integer:', RangeSlider(id='int_slider',
-                                              range=(-100, 100))),
-                    (u'Float:', RangeSlider(id='float_slider',
-                                            slider=FloatSlider(),
-                                            range=(-10.0, 10.0))),
-                    (u'Log:', RangeSlider(id='log_slider',
-                                          slider=LogSlider(),
-                                          range=(0.5, 2.0))),
+                    (u'Integer:', RangeSlider(
+                        id='int_slider',
+                        range=(-100, 100))),
+                    (u'Float:', RangeSlider(
+                        id='float_slider',
+                        slider=FloatSlider(),
+                        range=(-10.0, 10.0),
+                        field_format_func=u'{0:.2f}'.format)),
+                    (u'Log:', RangeSlider(
+                        id='log_slider',
+                        slider=LogSlider(),
+                        range=(0.5, 2.0),
+                        field_format_func=u'{0:.6f}'.format)),
                     fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
                 ),
                 'int_slider.value := object.int_value',
