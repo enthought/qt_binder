@@ -74,29 +74,31 @@ class ModelUI(Controller):
         ('deg', u'Degrees'),
     ])
 
-    traits_view = View(
-        VGroup(
-            Bound(
-                TextField(id='input_units'),
-                'valid << object.input_units_valid',
-                'value := object.input_units',
-                label=u'Input units:',
-            ),
-            Bound(
-                HBoxLayout(
-                    CheckBox(id='check'),
-                    EditableComboBox(id='combo'),
+    def default_traits_view(self):
+        traits_view = View(
+            VGroup(
+                Bound(
+                    TextField(id='input_units'),
+                    'valid << object.input_units_valid',
+                    'value := object.input_units',
+                    label=u'Input units:',
                 ),
-                'combo.lineEdit.valid << object.output_units_valid',
-                'combo.values << handler.output_units_recommendations',
-                'combo.enabled << object.convert_units',
-                'check.checked := object.convert_units',
-                'combo.value >> object.output_units',
-                label=u'Convert units:',
+                Bound(
+                    HBoxLayout(
+                        CheckBox(id='check'),
+                        EditableComboBox(id='combo'),
+                    ),
+                    'combo.lineEdit.valid << object.output_units_valid',
+                    'combo.values << handler.output_units_recommendations',
+                    'combo.enabled << object.convert_units',
+                    'check.checked := object.convert_units',
+                    'combo.value >> object.output_units',
+                    label=u'Convert units:',
+                ),
             ),
-        ),
-        buttons=['OK'],
-    )
+            buttons=['OK'],
+        )
+        return traits_view
 
     def _get_output_units_recommendations(self):
         recommendations = []

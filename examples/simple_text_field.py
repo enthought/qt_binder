@@ -27,22 +27,24 @@ class Model(HasTraits):
     mode = Enum('auto', 'enter')
     value = Unicode()
 
-    traits_view = View(
-        Bound(
-            EnumDropDown(
-                values=[('auto', u'Automatic'),
-                        ('enter', u'On Enter')]),
-            'value := object.mode',
-            label=u'Mode:',
-        ),
-        Item('value', style='readonly'),
-        Bound(
-            TextField(),
-            'mode := object.mode',
-            'value := object.value',
-            label=u'Text:',
-        ),
-    )
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                EnumDropDown(
+                    values=[('auto', u'Automatic'),
+                            ('enter', u'On Enter')]),
+                'value := object.mode',
+                label=u'Mode:',
+            ),
+            Item('value', style='readonly'),
+            Bound(
+                TextField(),
+                'mode := object.mode',
+                'value := object.value',
+                label=u'Text:',
+            ),
+        )
+        return traits_view
 
 
 def main():

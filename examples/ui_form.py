@@ -39,24 +39,26 @@ class Model(HasStrictTraits):
     slider_value = Range(-10, 10)
     degrees = Range(0, 359)
 
-    traits_view = View(
-        Bound(
-            UIFile(
-                localfile('form.ui'),
-                overrides=dict(
-                    lineEdit=TextField(validator=QtGui.QIntValidator()),
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                UIFile(
+                    localfile('form.ui'),
+                    overrides=dict(
+                        lineEdit=TextField(validator=QtGui.QIntValidator()),
+                    ),
+                ),
+                'lineEdit.value := object.text',
+                'dial.value := object.degrees',
+                'dial_value.text << format_deg(object.degrees)',
+                'horizontalSlider.value := object.slider_value',
+                extra_context=dict(
+                    format_deg=format_deg,
                 ),
             ),
-            'lineEdit.value := object.text',
-            'dial.value := object.degrees',
-            'dial_value.text << format_deg(object.degrees)',
-            'horizontalSlider.value := object.slider_value',
-            extra_context=dict(
-                format_deg=format_deg,
-            ),
-        ),
-        resizable=True,
-    )
+            resizable=True,
+        )
+        return traits_view
 
 
 if __name__ == '__main__':

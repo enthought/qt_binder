@@ -33,30 +33,32 @@ class Model(HasTraits):
     float_value = Float(0.0)
     log_value = Float(1.0)
 
-    traits_view = View(
-        Bound(
-            FormLayout(
-                (u'Integer:', HBoxLayout(
-                    IntSlider(id='int_slider', range=(-100, 100)),
-                    Label(id='int_text', minimumWidth=50))),
-                (u'Float:', HBoxLayout(
-                    FloatSlider(id='float_slider', range=(-10.0, 10.0)),
-                    Label(id='float_text', minimumWidth=50))),
-                (u'Log:', HBoxLayout(
-                    LogSlider(id='log_slider', range=(0.5, 2.0)),
-                    Label(id='log_text', minimumWidth=50))),
-                fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                FormLayout(
+                    (u'Integer:', HBoxLayout(
+                        IntSlider(id='int_slider', range=(-100, 100)),
+                        Label(id='int_text', minimumWidth=50))),
+                    (u'Float:', HBoxLayout(
+                        FloatSlider(id='float_slider', range=(-10.0, 10.0)),
+                        Label(id='float_text', minimumWidth=50))),
+                    (u'Log:', HBoxLayout(
+                        LogSlider(id='log_slider', range=(0.5, 2.0)),
+                        Label(id='log_text', minimumWidth=50))),
+                    fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+                ),
+                'int_slider.value := object.int_value',
+                'int_text.text << str(object.int_value)',
+                'float_slider.value := object.float_value',
+                'float_text.text << u"{:0.2f}".format(object.float_value)',
+                'log_slider.value := object.log_value',
+                'log_text.text << u"{:0.4f}".format(object.log_value)',
             ),
-            'int_slider.value := object.int_value',
-            'int_text.text << str(object.int_value)',
-            'float_slider.value := object.float_value',
-            'float_text.text << u"{:0.2f}".format(object.float_value)',
-            'log_slider.value := object.log_value',
-            'log_text.text << u"{:0.4f}".format(object.log_value)',
-        ),
-        resizable=True,
-        title=u'Sliders',
-    )
+            resizable=True,
+            title=u'Sliders',
+        )
+        return traits_view
 
 
 def main():
