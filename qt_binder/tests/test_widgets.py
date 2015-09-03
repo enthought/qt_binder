@@ -14,27 +14,50 @@
 
 import unittest
 
-from ..widgets import TextField
+from traits.api import Undefined, pop_exception_handler, push_exception_handler
+from traits.testing.unittest_tools import UnittestTools
+
+from ..widgets import FloatSlider, RangeSlider, TextField
 
 
-class TestTextField(unittest.TestCase):
-
-    def setUp(self):
-        super(TestTextField, self).setUp()
-        self.clear_trait_changes()
-
-    def clear_trait_changes(self):
-        self.trait_changes = []
-
-    def on_trait_change_callback(self, object, name, old, new):
-        self.trait_changes.append((object, name, old, new))
+class TestTextField(unittest.TestCase, UnittestTools):
 
     def test_traits(self):
         field = TextField()
-        field.on_trait_change(self.on_trait_change_callback, 'value')
-        field.value = u''
-        self.assertEqual(
-            self.trait_changes,
-            [(field, 'value', u'', u'')],
-        )
-        self.clear_trait_changes()
+        self.assertEqual(field.value, u'')
+        with self.assertTraitChanges(field, 'value', count=1):
+            # The value trait should always fire a notification, even if the
+            # value is not different.
+            field.value = u''
+
+
+class TestRangeSlider(unittest.TestCase):
+
+    def setUp(self):
+        push_exception_handler(reraise_exceptions=True)
+
+    def tearDown(self):
+        pop_exception_handler()
+
+    def test_initialization(self):
+        # With a random hash seed, this would fail randomly if we didn't take
+        # special care in RangeSlider.__init__()
+        inner = FloatSlider()
+        outer = RangeSlider(slider=inner, range=(-10.0, 10.0))
+        self.assertEqual(inner.range, (-10.0, 10.0))
+        self.assertIs(outer.slider, inner)
+
+    def test_field_format_func(self):
+        slider = RangeSlider(field_format_func=u'+{0}'.format)
+        slider.slider.value = 10
+        self.assertEqual(slider.field.text, u'+10')
+        slider.value = 20
+        self.assertEqual(slider.field.text, u'20')
+
+    def test_field_text_edited(self):
+        slider = RangeSlider()
+        self.assertEqual(slider.value, 0)
+        self.assertEqual(slider.slider.value, 0)
+        slider.field.trait_property_changed('textEdited', Undefined, 20)
+        self.assertEqual(slider.value, 20)
+        self.assertEqual(slider.slider.value, 20)

@@ -30,63 +30,65 @@ class Model(HasTraits):
     last_pressed_button = Any(comparison_mode=NO_COMPARE)
     last_released_button = Any(comparison_mode=NO_COMPARE)
 
-    traits_view = View(
-        Bound(
-            VBoxLayout(
-                GroupBox(
-                    VBoxLayout(
-                        PushButton(text=u'Push A', id='push_a'),
-                        PushButton(text=u'Push B', id='push_b'),
-                        PushButton(text=u'Push C', id='push_c'),
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                VBoxLayout(
+                    GroupBox(
+                        VBoxLayout(
+                            PushButton(text=u'Push A', id='push_a'),
+                            PushButton(text=u'Push B', id='push_b'),
+                            PushButton(text=u'Push C', id='push_c'),
+                        ),
+                        title=u'Push Buttons',
                     ),
-                    title=u'Push Buttons',
+                    GroupBox(
+                        VBoxLayout(
+                            RadioButton(text=u'Radio A', id='radio_a',
+                                        checked=True),
+                            RadioButton(text=u'Radio B', id='radio_b'),
+                            RadioButton(text=u'Radio C', id='radio_c'),
+                        ),
+                        title=u'Radio Buttons',
+                    ),
+                    GroupBox(
+                        FormLayout(
+                            (u'Clicked:', Label(id='clicked')),
+                            (u'Pressed:', Label(id='pressed')),
+                            (u'Released:', Label(id='released')),
+                        ),
+                        title=u'Events',
+                    ),
                 ),
-                GroupBox(
-                    VBoxLayout(
-                        RadioButton(text=u'Radio A', id='radio_a',
-                                    checked=True),
-                        RadioButton(text=u'Radio B', id='radio_b'),
-                        RadioButton(text=u'Radio C', id='radio_c'),
-                    ),
-                    title=u'Radio Buttons',
-                ),
-                GroupBox(
-                    FormLayout(
-                        (u'Clicked:', Label(id='clicked')),
-                        (u'Pressed:', Label(id='pressed')),
-                        (u'Released:', Label(id='released')),
-                    ),
-                    title=u'Events',
+                ('push_buttons.buttonClicked_QAbstractButton >> '
+                 'object.last_clicked_button'),
+                ('push_buttons.buttonPressed_QAbstractButton >> '
+                 'object.last_pressed_button'),
+                ('push_buttons.buttonReleased_QAbstractButton >> '
+                 'object.last_released_button'),
+                ('radio_buttons.buttonClicked_QAbstractButton >> '
+                 'object.last_clicked_button'),
+                ('radio_buttons.buttonPressed_QAbstractButton >> '
+                 'object.last_pressed_button'),
+                ('radio_buttons.buttonReleased_QAbstractButton >> '
+                 'object.last_released_button'),
+                ('clicked.text << (object.last_clicked_button).text() '
+                 'if object.last_clicked_button else u""'),
+                ('pressed.text << (object.last_pressed_button).text() '
+                 'if object.last_pressed_button else u""'),
+                ('released.text << (object.last_released_button).text() '
+                 'if object.last_released_button else u""'),
+                button_groups=dict(
+                    push_buttons=ButtonGroup('push_a', 'push_b', 'push_c'),
+                    radio_buttons=ButtonGroup('radio_a', 'radio_b', 'radio_c',
+                                              exclusive=True),
                 ),
             ),
-            ('push_buttons.buttonClicked_QAbstractButton >> '
-             'object.last_clicked_button'),
-            ('push_buttons.buttonPressed_QAbstractButton >> '
-             'object.last_pressed_button'),
-            ('push_buttons.buttonReleased_QAbstractButton >> '
-             'object.last_released_button'),
-            ('radio_buttons.buttonClicked_QAbstractButton >> '
-             'object.last_clicked_button'),
-            ('radio_buttons.buttonPressed_QAbstractButton >> '
-             'object.last_pressed_button'),
-            ('radio_buttons.buttonReleased_QAbstractButton >> '
-             'object.last_released_button'),
-            ('clicked.text << (object.last_clicked_button).text() '
-             'if object.last_clicked_button else u""'),
-            ('pressed.text << (object.last_pressed_button).text() '
-             'if object.last_pressed_button else u""'),
-            ('released.text << (object.last_released_button).text() '
-             'if object.last_released_button else u""'),
-            button_groups=dict(
-                push_buttons=ButtonGroup('push_a', 'push_b', 'push_c'),
-                radio_buttons=ButtonGroup('radio_a', 'radio_b', 'radio_c',
-                                          exclusive=True),
-            ),
-        ),
-        resizable=True,
-        width=200,
-        title=u'Grid Layouts',
-    )
+            resizable=True,
+            width=200,
+            title=u'Button Groups',
+        )
+        return traits_view
 
 
 def main():

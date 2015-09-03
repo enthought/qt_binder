@@ -54,28 +54,30 @@ class Model(HasTraits):
     value = Any(comparison_mode=NO_COMPARE)
     evaluator_func = Callable(int)
 
-    traits_view = View(
-        Bound(
-            FormLayout(
-                (u'Text:', TextField(id='field')),
-                (u'Kind:', EnumDropDown(
-                    id='combo',
-                    values=[
-                        (int, u'Integer'),
-                        (float, u'Float'),
-                    ])),
-                (u'Value:', Label(id='value')),
-                (u'Text:', Label(id='text')),
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                FormLayout(
+                    (u'Text:', TextField(id='field')),
+                    (u'Kind:', EnumDropDown(
+                        id='combo',
+                        values=[
+                            (int, u'Integer'),
+                            (float, u'Float'),
+                        ])),
+                    (u'Value:', Label(id='value')),
+                    (u'Text:', Label(id='text')),
+                ),
+                'field.value := object.text',
+                'combo.value := object.evaluator_func',
+                'field.validator << PythonEvalidator(object.evaluator_func)',
+                'value.text << repr(object.value)',
+                'text.text << object.text',
+                extra_context=dict(PythonEvalidator=PythonEvalidator),
             ),
-            'field.value := object.text',
-            'combo.value := object.evaluator_func',
-            'field.validator << PythonEvalidator(object.evaluator_func)',
-            'value.text << repr(object.value)',
-            'text.text << object.text',
-            extra_context=dict(PythonEvalidator=PythonEvalidator),
-        ),
-        resizable=True,
-    )
+            resizable=True,
+        )
+        return traits_view
 
     @on_trait_change('text,evaluator_func')
     def _update_value(self):

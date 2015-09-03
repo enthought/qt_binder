@@ -33,27 +33,29 @@ class Model(HasTraits):
     high_bound = Range(low=60, high=100)
     x = Range(low='low_bound', high='high_bound')
 
-    traits_view = View(
-        Bound(
-            FormLayout(
-                (u'Low:',
-                 RangeSlider(id='low', range=(0, 40))),
-                (u'High:',
-                 RangeSlider(id='high', range=(60, 100))),
-                (u'RangeEditor:',
-                 TraitsUI(Item('x'))),
-                fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                FormLayout(
+                    (u'Low:',
+                     RangeSlider(id='low', range=(0, 40))),
+                    (u'High:',
+                     RangeSlider(id='high', range=(60, 100))),
+                    (u'RangeEditor:',
+                     TraitsUI(Item('x'))),
+                    fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+                ),
+                'low.value := object.low_bound',
+                'high.value := object.high_bound',
+                # Make the labels align nicely by fixing their widths using
+                # stylesheets.
+                stylesheet=(u'*[binder_class="RangeSlider"] > .QLabel '
+                            u'{min-width: 30px; max-width: 30px;}'),
             ),
-            'low.value := object.low_bound',
-            'high.value := object.high_bound',
-            # Make the labels align nicely by fixing their widths using
-            # stylesheets.
-            stylesheet=(u'*[binder_class="RangeSlider"] > .QLabel '
-                        u'{min-width: 30px; max-width: 30px;}'),
-        ),
-        resizable=True,
-        title=u'Traits UI Editor',
-    )
+            resizable=True,
+            title=u'Traits UI Editor',
+        )
+        return traits_view
 
 
 def main():

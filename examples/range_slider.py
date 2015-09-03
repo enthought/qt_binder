@@ -33,30 +33,37 @@ class Model(HasTraits):
     float_value = Float(0.0)
     log_value = Float(1.0)
 
-    traits_view = View(
-        Bound(
-            FormLayout(
-                (u'Integer:', RangeSlider(id='int_slider',
-                                          range=(-100, 100))),
-                (u'Float:', RangeSlider(id='float_slider',
-                                        slider=FloatSlider(),
-                                        range=(-10.0, 10.0))),
-                (u'Log:', RangeSlider(id='log_slider',
-                                      slider=LogSlider(),
-                                      range=(0.5, 2.0))),
-                fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+    def default_traits_view(self):
+        traits_view = View(
+            Bound(
+                FormLayout(
+                    (u'Integer:', RangeSlider(
+                        id='int_slider',
+                        range=(-100, 100))),
+                    (u'Float:', RangeSlider(
+                        id='float_slider',
+                        slider=FloatSlider(),
+                        range=(-10.0, 10.0),
+                        field_format_func=u'{0:.2f}'.format)),
+                    (u'Log:', RangeSlider(
+                        id='log_slider',
+                        slider=LogSlider(),
+                        range=(0.5, 2.0),
+                        field_format_func=u'{0:.6f}'.format)),
+                    fieldGrowthPolicy=QtGui.QFormLayout.ExpandingFieldsGrow,
+                ),
+                'int_slider.value := object.int_value',
+                'float_slider.value := object.float_value',
+                'log_slider.value := object.log_value',
+                # Make the labels align nicely by fixing their widths using
+                # stylesheets.
+                stylesheet=(u'*[binder_class="RangeSlider"] > .QLabel '
+                            u'{min-width: 40px; max-width: 40px;}'),
             ),
-            'int_slider.value := object.int_value',
-            'float_slider.value := object.float_value',
-            'log_slider.value := object.log_value',
-            # Make the labels align nicely by fixing their widths using
-            # stylesheets.
-            stylesheet=(u'*[binder_class="RangeSlider"] > .QLabel '
-                        u'{min-width: 40px; max-width: 40px;}'),
-        ),
-        resizable=True,
-        title=u'Range Sliders',
-    )
+            resizable=True,
+            title=u'Range Sliders',
+        )
+        return traits_view
 
 
 def main():

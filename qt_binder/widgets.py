@@ -430,14 +430,32 @@ class RangeSlider(Composite):
     range = Tuple(Any(0), Any(99))
 
     #: The formatting function for the labels.
-    format_func = Callable(six.text_type)
+    label_format_func = Callable(six.text_type)
 
+    #: The formatting function for the text field. This is used only when the
+    #: slider is setting the value.
+    field_format_func = Callable(six.text_type)
+
+    #: The slider widget.
     slider = Instance(BaseSlider, factory=IntSlider, args=())
+
+    #: The field widget.
     field = Instance(LineEdit, args=())
 
     _low_label = Any()
     _high_label = Any()
     _from_text_func = Callable(int)
+
+    def __init__(self, *args, **traits):
+        # Make sure that a `slider` argument gets assigned before anything else
+        # because it will affect what range can be accepted.
+        if 'slider' in traits:
+            slider = traits.pop('slider')
+            super(RangeSlider, self).__init__()
+            self.slider = slider
+            self.trait_set(**traits)
+        else:
+            super(RangeSlider, self).__init__(*args, **traits)
 
     def construct(self):
         self.slider.construct()
@@ -478,9 +496,11 @@ class RangeSlider(Composite):
                 if self.qobj is not None:
                     self.field.validator.setRange(range[0], range[1])
                     if not isinstance(self.slider, IntSlider):
+                        # Note: this assumes that all sliders other than
+                        # IntSlider have decimal inputs.
                         self.field.validator.setDecimals(16)
-                    self._low_label.setText(self.format_func(range[0]))
-                    self._high_label.setText(self.format_func(range[1]))
+                    self._low_label.setText(self.label_format_func(range[0]))
+                    self._high_label.setText(self.label_format_func(range[1]))
                 self.field.text = six.text_type(value)
                 self.slider.range = range
                 self.slider.value = value
@@ -491,7 +511,7 @@ class RangeSlider(Composite):
             with self.loopback_guard('value'):
                 value = self.slider.value
                 self.value = value
-                self.field.text = six.text_type(value)
+                self.field.text = self.field_format_func(value)
 
     @on_trait_change('field:textEdited')
     def _on_field_text(self, text):
