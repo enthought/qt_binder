@@ -1,7 +1,7 @@
 from . import qt_api
 
 if qt_api == 'pyqt':
-    from PyQt4.QtTest import *
+    from PyQt4.QtTest import *  # noqa
 
 else:
-    from PySide.QtTest import *
+    from PySide.QtTest import *  # noqa

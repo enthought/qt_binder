@@ -26,9 +26,6 @@ if qt_api == 'pyqt':
         def isTranslationEnabled(self):
             pass
 
-        def load(self, arg__1, parentWidget=None):
-            pass
-
         def load(self, device, parentWidget=None):
             pass
 
@@ -57,4 +54,4 @@ if qt_api == 'pyqt':
     del QObject
 
 else:
-    from PySide.QtUiTools import *
+    from PySide.QtUiTools import *  # noqa

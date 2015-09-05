@@ -2,7 +2,7 @@
 # Copyright (c) 2015, Enthought Inc
 # All rights reserved.
 #
-# This software is provided without warranty under the terms of the BSD license.
+# This software is provided without warranty under the terms of the BSD license
 
 #
 # Author: Enthought Inc
@@ -10,6 +10,7 @@
 #------------------------------------------------------------------------------
 
 import os
+
 
 def prepare_pyqt4():
     # Set PySide compatible APIs.
@@ -26,12 +27,12 @@ qt_api = os.environ.get('QT_API')
 
 if qt_api is None:
     try:
-        import PySide
+        import PySide  # noqa
         qt_api = 'pyside'
     except ImportError:
         try:
             prepare_pyqt4()
-            import PyQt4
+            import PyQt4  # noqa
             qt_api = 'pyqt'
         except ImportError:
             raise ImportError('Cannot import PySide or PyQt4')
@@ -40,5 +41,5 @@ elif qt_api == 'pyqt':
     prepare_pyqt4()
 
 elif qt_api != 'pyside':
-    raise RuntimeError("Invalid Qt API %r, valid values are: 'pyqt' or 'pyside'"
-                       % qt_api)
+    msg = "Invalid Qt API %r, valid values are: 'pyqt' or 'pyside'" % qt_api
+    raise RuntimeError(msg)
