@@ -12,18 +12,18 @@
 #
 #------------------------------------------------------------------------------
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
 import six
 
 from traits.api import CList, Either, Instance, Int, List, Property, Str, \
     TraitError, Tuple, Unicode, on_trait_change
 
 from .binder import Binder, Composite, NChildren
+from .qt import QtCore, QtGui
+from .qt.QtCore import Qt
 from .type_registry import TypeRegistry
 
 
-#: The global registry mapping PySide types to their Binders.
+#: The global registry mapping PySide/PyQt types to their Binders.
 binder_registry = TypeRegistry()
 
 

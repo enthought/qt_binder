@@ -18,14 +18,13 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from PySide import QtGui
-
 from traits.api import HasTraits, Float, Int
 from traitsui.api import View
 
 from qt_binder.api import Bound
-from qt_binder.widgets import IntSlider, FloatSlider, LogSlider
+from qt_binder.qt import QtGui
 from qt_binder.raw_widgets import FormLayout, HBoxLayout, Label
+from qt_binder.widgets import IntSlider, FloatSlider, LogSlider
 
 
 class Model(HasTraits):

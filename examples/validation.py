@@ -16,15 +16,14 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from PySide import QtGui
-
 from traits.api import Any, Callable, HasTraits, NO_COMPARE, TraitError, \
     Unicode, on_trait_change
 from traitsui.api import View
 
 from qt_binder.api import Bound
-from qt_binder.widgets import TextField, EnumDropDown
+from qt_binder.qt import QtGui
 from qt_binder.raw_widgets import FormLayout, Label
+from qt_binder.widgets import TextField, EnumDropDown
 
 
 class PythonEvalidator(QtGui.QValidator):

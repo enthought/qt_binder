@@ -15,12 +15,12 @@
 import unittest
 
 import six
-from PySide import QtCore, QtGui
 
 from traits.api import Bool, Instance
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
+from ..qt import QtCore, QtGui
 
 
 class TestBinder(unittest.TestCase):

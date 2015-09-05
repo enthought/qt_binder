@@ -18,13 +18,13 @@ from collections import Counter
 from math import exp, log
 import operator
 
-from PySide import QtCore, QtGui, QtUiTools
 import six
 
 from traits.api import Any, Callable, Constant, Dict, Enum, Float, Instance, \
     Int, List, NO_COMPARE, Str, Tuple, Undefined, Unicode, on_trait_change
 
 from .binder import Binder, QtDynamicProperty, Rename, Default
+from .qt import QtCore, QtGui, QtUiTools
 from .raw_widgets import ComboBox, Composite, LineEdit, Slider, binder_registry
 
 

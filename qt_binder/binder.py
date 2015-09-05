@@ -15,7 +15,6 @@
 from collections import Counter, deque
 import weakref
 
-from PySide import QtCore
 import six
 
 from traits.api import HasStrictTraits, Instance, List, Property, Str, \
@@ -25,6 +24,7 @@ from .constants import DELAYED_CONNECTION, DELAYED_SETATTR, \
     EXISTING_INSTANCE_TRAIT, EXISTING_NOTIFIERS, FORCE_INSTANCE_TRAIT, \
     FORCE_NOTIFIERS
 from .loopback_guard import LoopbackGuard
+from .qt import QtCore
 
 
 def _slot_name(name):

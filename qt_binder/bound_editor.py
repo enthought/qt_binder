@@ -12,8 +12,6 @@
 #
 #------------------------------------------------------------------------------
 
-from PySide import QtGui
-
 from traits.api import Any, Callable, Dict, Either, HasPrivateTraits, \
     Instance, List, Str, Undefined
 from traitsui.editor_factory import EditorFactory
@@ -22,6 +20,7 @@ from traitsui.qt4.editor import Editor
 
 from .binder import Binder
 from .binding import Binding
+from .qt import QtGui
 from .raw_widgets import ButtonGroup
 
 

@@ -16,12 +16,11 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from PySide.QtCore import Qt
-
 from traits.api import HasTraits
 from traitsui.api import View
 
 from qt_binder.api import Bound
+from qt_binder.qt.QtCore import Qt
 from qt_binder.raw_widgets import BasicGridLayout, CheckBox, GroupBox, \
     LineEdit, PushButton, SpanGridLayout, VBoxLayout
 
