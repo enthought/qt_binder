@@ -27,9 +27,9 @@ class TestBinder(unittest.TestCase):
 
     def setUp(self):
         # Start up a QApplication if needed.
-        app = QtGui.QApplication.instance()
-        if app is None:
-            app = QtGui.QApplication([])
+        self.app = QtGui.QApplication.instance()
+        if self.app is None:
+            self.app = QtGui.QApplication([])
 
         # We make a new class here to test that the traits get added only at
         # the right time.
