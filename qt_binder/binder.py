@@ -517,7 +517,9 @@ class Binder(HasStrictTraits):
             # Add all getter/setter pairs that we can identify.
             methods = set()
             for name, class_attr in vars(qt_class).items():
-                if callable(class_attr):
+                # sip methoddescriptor objects do not have __call__() defined.
+                if (callable(class_attr) or
+                        type(class_attr).__name__ == 'methoddescriptor'):
                     methods.add(name)
             methods.difference_update(seen)
             for name in methods:
