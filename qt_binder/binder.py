@@ -76,7 +76,7 @@ class QtTrait(TraitType):
         qobj = object.qobj
         slot = _slot_for(weakref.ref(object), name)
         object.__dict__[slot.__name__] = slot
-        qobj.connect(self.signal, slot)
+        QtCore.QObject.connect(qobj, self.signal, slot)
 
     def disconnect_signal(self, object, name):
         """ Disconnect from the Qt signal, if any.
@@ -87,7 +87,7 @@ class QtTrait(TraitType):
         slot_name = _slot_name(name)
         slot = object.__dict__.pop(slot_name, None)
         if slot is not None:
-            object.qobj.disconnect(self.signal, slot)
+            QtCore.QObject.disconnect(object.qobj, self.signal, slot)
 
 
 class QtProperty(QtTrait):
