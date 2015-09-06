@@ -468,8 +468,10 @@ class BasicGridLayout(Layout):
         None,
         Instance(Binder),
         Unicode,
-        Tuple(Instance(Binder), Instance(Qt.AlignmentFlag)),
-        Tuple(Unicode, Instance(Qt.AlignmentFlag)),
+        Tuple(Instance(Binder), Either(Instance(Qt.AlignmentFlag),
+                                       Instance(Qt.Alignment))),
+        Tuple(Unicode, Either(Instance(Qt.AlignmentFlag),
+                              Instance(Qt.Alignment))),
     )))
 
     #: The child ``Binder`` instances.
@@ -496,7 +498,7 @@ class BasicGridLayout(Layout):
         qobj = self.qobj
         for irow, row in enumerate(self.rows):
             for icol, cell in enumerate(row):
-                alignment = 0
+                alignment = Qt.Alignment(0)
                 if isinstance(cell, tuple):
                     cell, alignment = cell
                 if isinstance(cell, six.string_types):
