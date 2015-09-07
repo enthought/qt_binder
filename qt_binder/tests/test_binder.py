@@ -185,7 +185,10 @@ class TestBinder(unittest.TestCase):
         if qt_api == 'pyside':
             self.assertIs(obj.destroyed, qobj.destroyed)
         else:
-            self.assertEqual(obj.destroyed.signal, qobj.destroyed.signal)
+            # There is no way to check if a PyQt4.QtCore.pyqtBoundSignal is the
+            # same as another, and obtaining it from the QObject gets you
+            # a different object every time.
+            pass
 
         # Check delayed signal.
         qobj.destroyed[QtCore.QObject].emit(qobj)
