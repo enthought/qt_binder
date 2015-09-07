@@ -529,8 +529,9 @@ class Binder(HasStrictTraits):
                 # about their argument structure.
                 putative_setter = 'set' + name.title()
                 if putative_setter in methods:
+                    trait_name = renamings.get(name, name)
                     binder_class.add_class_trait(
-                        name, QtGetterSetter(name, putative_setter))
+                        trait_name, QtGetterSetter(name, putative_setter))
             setattr(binder_class, initialized_name, True)
 
     def _qobj_changed(self, old, new):

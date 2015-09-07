@@ -237,6 +237,7 @@ class TestBinder(unittest.TestCase):
             accessibleName = Default(u'blah')
             what_is_this = Rename('whatsThis', default=u'Foo')
             object_name = Rename('objectName')
+            the_layout = Rename('layout')
 
         class SubWidget(Widget):
             pass
@@ -251,10 +252,13 @@ class TestBinder(unittest.TestCase):
             self.assertEqual(w.what_is_this, u'Foo')
             self.assertEqual(w.qobj.whatsThis(), u'Foo')
             self.assertEqual(w.object_name, w.qobj.objectName())
+            self.assertEqual(w.the_layout, None)
             with self.assertRaises(AttributeError):
                 w.whatsThis
             with self.assertRaises(AttributeError):
                 w.objectName
+            with self.assertRaises(AttributeError):
+                w.layout
             w.dispose()
 
             w = cls(accessibleName=u'not-blah', what_is_this=u'Bar')
