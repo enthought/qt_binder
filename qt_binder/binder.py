@@ -260,12 +260,13 @@ class QtSlot(QtTrait):
     def __init__(self, meta_method, **metadata):
         super(QtSlot, self).__init__(**metadata)
         self.meta_method = meta_method
+        self.qname = meta_method.signature().split('(')[0]
         self.n_args = len(meta_method.parameterTypes())
 
     def get(self, object, name):
         """ Get the underlying method object.
         """
-        return getattr(object.qobj, name)
+        return getattr(object.qobj, self.qname)
 
     def set(self, object, name, value):
         """ Set the value of this trait.
@@ -278,7 +279,7 @@ class QtSlot(QtTrait):
             d[name] = value
             return
         args = self._process_args(value)
-        getattr(qobj, name)(*args)
+        getattr(qobj, self.qname)(*args)
 
     def _process_args(self, value):
         if self.n_args == 0:
