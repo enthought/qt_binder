@@ -27,6 +27,11 @@ from .loopback_guard import LoopbackGuard
 from .qt import QtCore
 
 
+NULL_VARIANT_VALUES = {
+    'QString': u'',
+}
+
+
 def _slot_name(name):
     return '_{}_property_changed'.format(name)
 
@@ -40,6 +45,14 @@ def _slot_for(ref, name):
             obj.trait_property_changed(name, Undefined, args)
     slot.__name__ = _slot_name(name)
     return slot
+
+
+def _guard_against_null_variant(value):
+    """ Convert PyQt4's QPyNullVariant to a reasonable value.
+    """
+    if type(value).__name__ == 'QPyNullVariant':
+        return NULL_VARIANT_VALUES.get(value.typeName(), None)
+    return value
 
 
 class QtTrait(TraitType):
@@ -113,7 +126,11 @@ class QtProperty(QtTrait):
                 msg = ("Property {0!r} not available until Binder is given "
                        "its QObject.".format(name))
                 raise AttributeError(msg)
-        value = self.meta_prop.read(object.qobj)
+        value = self.meta_prop.read(qobj)
+        # PyQt4 will sometimes return a QPyNullVariant via this API even if it
+        # converts it to the correct null value for the type for the property
+        # attribute on the QObject itself.
+        value = _guard_against_null_variant(value)
         return value
 
     def set(self, object, name, value):
@@ -301,7 +318,8 @@ class QtSignal(QtSlot):
             d[name] = value
             return
         args = self._process_args(value)
-        getattr(qobj, name).emit(*args)
+        # Use the QMetaMethod to invoke the signal for PyQt4 compatibility.
+        self.meta_method.invoke(qobj, *args)
 
 
 class Rename(object):
