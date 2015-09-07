@@ -16,7 +16,7 @@ import unittest
 
 import six
 
-from traits.api import Bool, Instance
+from traits.api import Bool, Instance, push_exception_handler, pop_exception_handler
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
@@ -31,6 +31,8 @@ class TestBinder(unittest.TestCase):
         if self.app is None:
             self.app = QtGui.QApplication([])
 
+        push_exception_handler(reraise_exceptions=True)
+
         # We make a new class here to test that the traits get added only at
         # the right time.
         # WARNING: If anyone instantiates Binder() itself, this subclass will
@@ -41,6 +43,9 @@ class TestBinder(unittest.TestCase):
             x = QtDynamicProperty(10)
 
         self.Object = Object
+
+    def tearDown(self):
+        pop_exception_handler()
 
     def test_object_traits(self):
         # No QtTraits made before instantiation.
