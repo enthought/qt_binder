@@ -7,7 +7,7 @@ python:
   - 3.4
 env:
   - QT_API=pyside
-  - QT_API=PyQt4
+  - QT_API=pyqt
 addons:
   apt:
     packages:
