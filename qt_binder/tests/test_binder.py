@@ -16,7 +16,8 @@ import unittest
 
 import six
 
-from traits.api import Bool, Instance, push_exception_handler, pop_exception_handler
+from traits.api import Bool, Instance, pop_exception_handler, \
+    push_exception_handler
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
