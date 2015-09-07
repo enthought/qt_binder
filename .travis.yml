@@ -13,6 +13,7 @@ addons:
     packages:
     - python-qt4-dev
     - python-qt4-gl
+    - python-qt4
     - ccache
     - cmake
 cache:
