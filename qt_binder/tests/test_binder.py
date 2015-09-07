@@ -20,7 +20,7 @@ from traits.api import Bool, Instance
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
-from ..qt import QtCore, QtGui
+from ..qt import QtCore, QtGui, qt_api
 
 
 class TestBinder(unittest.TestCase):
@@ -175,7 +175,11 @@ class TestBinder(unittest.TestCase):
         qobj = obj.qobj
         obj.configure()
 
-        self.assertIs(obj.destroyed, qobj.destroyed)
+        # PyQt4 signal instances are not unique.
+        if qt_api == 'pyside':
+            self.assertIs(obj.destroyed, qobj.destroyed)
+        else:
+            self.assertEqual(obj.destroyed.signal, qobj.destroyed.signal)
 
         # Check delayed signal.
         qobj.destroyed[QtCore.QObject].emit(qobj)
