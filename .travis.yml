@@ -9,6 +9,16 @@ python:
 env:
   - QT_API=pyside
   - QT_API=pyqt
+branches:
+  # We have both "Build pushes" and "Build PRs" turned on. Without the
+  # following setting, Travis CI will do 2 builds for every update to a PR, one
+  # which is tested as merged into master (what we want) and one just as the
+  # raw PR branch (meh). We'd also like to run an additional test for any
+  # pushes to master (which should only be PR merges). The following setting
+  # whitelists master as a branch for the "push" builds. PR builds will happen
+  # regardless. If you want your WIP branches tested, open up a WIP PR.
+  only:
+    - master
 addons:
   apt:
     packages:
