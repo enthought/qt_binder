@@ -3,6 +3,7 @@ sudo: false
 notifications:
   email: false
 python:
+  - 2.7
   - 2.7_with_system_site_packages
   - 3.4
 env:
@@ -13,9 +14,16 @@ addons:
     packages:
     - python-qt4-dev
     - python-qt4-gl
-    - python-qt4
     - ccache
     - cmake
+matrix:
+  exclude:
+    - python: 2.7_with_system_site_packages
+      env: QT_API=pyside
+    - python: 2.7
+      env: QT_API=pyqt
+    - python: 3.4
+      env: QT_API=pyqt
 cache:
   directories:
     - $HOME/.cache
