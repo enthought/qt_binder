@@ -58,4 +58,4 @@ else:
         loader = RecordingUiLoader()
         ui = loader.load(path)
 
-        return ui, ui.to_be_bound()
+        return ui, loader.to_be_bound()
