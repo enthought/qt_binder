@@ -15,21 +15,24 @@
 import unittest
 
 import six
-from PySide import QtCore, QtGui
 
-from traits.api import Bool, Instance
+from traits.api import Bool, Instance, pop_exception_handler, \
+    push_exception_handler
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
+from ..qt import QtCore, QtGui, qt_api
 
 
 class TestBinder(unittest.TestCase):
 
     def setUp(self):
         # Start up a QApplication if needed.
-        app = QtGui.QApplication.instance()
-        if app is None:
-            app = QtGui.QApplication([])
+        self.app = QtGui.QApplication.instance()
+        if self.app is None:
+            self.app = QtGui.QApplication([])
+
+        push_exception_handler(reraise_exceptions=True)
 
         # We make a new class here to test that the traits get added only at
         # the right time.
@@ -41,6 +44,9 @@ class TestBinder(unittest.TestCase):
             x = QtDynamicProperty(10)
 
         self.Object = Object
+
+    def tearDown(self):
+        pop_exception_handler()
 
     def test_object_traits(self):
         # No QtTraits made before instantiation.
@@ -175,7 +181,14 @@ class TestBinder(unittest.TestCase):
         qobj = obj.qobj
         obj.configure()
 
-        self.assertIs(obj.destroyed, qobj.destroyed)
+        # PyQt4 signal instances are not unique.
+        if qt_api == 'pyside':
+            self.assertIs(obj.destroyed, qobj.destroyed)
+        else:
+            # There is no way to check if a PyQt4.QtCore.pyqtBoundSignal is the
+            # same as another, and obtaining it from the QObject gets you
+            # a different object every time.
+            pass
 
         # Check delayed signal.
         qobj.destroyed[QtCore.QObject].emit(qobj)
@@ -238,6 +251,7 @@ class TestBinder(unittest.TestCase):
             what_is_this = Rename('whatsThis', default=u'Foo')
             object_name = Rename('objectName')
             the_layout = Rename('layout')
+            py_raise = Rename('raise_')
 
         class SubWidget(Widget):
             pass
@@ -253,6 +267,8 @@ class TestBinder(unittest.TestCase):
             self.assertEqual(w.qobj.whatsThis(), u'Foo')
             self.assertEqual(w.object_name, w.qobj.objectName())
             self.assertEqual(w.the_layout, None)
+            self.assertEqual(w.py_raise, w.qobj.raise_)
+            self.assertNotIn('raise', sorted(w.class_traits()))
             with self.assertRaises(AttributeError):
                 w.whatsThis
             with self.assertRaises(AttributeError):

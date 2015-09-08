@@ -53,8 +53,7 @@ Long Term
 Un-goals
 --------
 
-* Other toolkits. Probably not even PyQt4 until a specific need for it is
-  demonstrated.
+* Other toolkits.
 
 * Constraint-based layout. It can be useful for some advanced use cases, but is
   largely unnecessary for almost all of our use cases. It can be hard to debug

@@ -15,6 +15,9 @@ setup(
     url='https://github.com/enthought/qt_binder',
     license="BSD",
     packages=find_packages(exclude=['examples', 'examples.*']),
+    package_data={
+        'qt_binder.tests': ['*.ui'],
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',

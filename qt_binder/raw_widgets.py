@@ -12,18 +12,18 @@
 #
 #------------------------------------------------------------------------------
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
 import six
 
 from traits.api import CList, Either, Instance, Int, List, Property, Str, \
     TraitError, Tuple, Unicode, on_trait_change
 
 from .binder import Binder, Composite, NChildren
+from .qt import QtCore, QtGui
+from .qt.QtCore import Qt
 from .type_registry import TypeRegistry
 
 
-#: The global registry mapping PySide types to their Binders.
+#: The global registry mapping PySide/PyQt types to their Binders.
 binder_registry = TypeRegistry()
 
 
@@ -468,8 +468,10 @@ class BasicGridLayout(Layout):
         None,
         Instance(Binder),
         Unicode,
-        Tuple(Instance(Binder), Instance(Qt.AlignmentFlag)),
-        Tuple(Unicode, Instance(Qt.AlignmentFlag)),
+        Tuple(Instance(Binder), Either(Instance(Qt.AlignmentFlag),
+                                       Instance(Qt.Alignment))),
+        Tuple(Unicode, Either(Instance(Qt.AlignmentFlag),
+                              Instance(Qt.Alignment))),
     )))
 
     #: The child ``Binder`` instances.
@@ -496,7 +498,7 @@ class BasicGridLayout(Layout):
         qobj = self.qobj
         for irow, row in enumerate(self.rows):
             for icol, cell in enumerate(row):
-                alignment = 0
+                alignment = Qt.Alignment(0)
                 if isinstance(cell, tuple):
                     cell, alignment = cell
                 if isinstance(cell, six.string_types):

@@ -14,7 +14,7 @@ for details of what properties, signals, and slots are defined.
 
 .. data:: binder_registry
 
-    The global |TypeRegistry| mapping PySide types to their default |Binder|
+    The global |TypeRegistry| mapping PySide/PyQt types to their default |Binder|
     class.
 
 ----

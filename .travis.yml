@@ -4,7 +4,11 @@ notifications:
   email: false
 python:
   - 2.7
+  - 2.7_with_system_site_packages
   - 3.4
+env:
+  - QT_API=pyside
+  - QT_API=pyqt
 branches:
   # We have both "Build pushes" and "Build PRs" turned on. Without the
   # following setting, Travis CI will do 2 builds for every update to a PR, one
@@ -22,6 +26,14 @@ addons:
     - python-qt4-gl
     - ccache
     - cmake
+matrix:
+  exclude:
+    - python: 2.7_with_system_site_packages
+      env: QT_API=pyside
+    - python: 2.7
+      env: QT_API=pyqt
+    - python: 3.4
+      env: QT_API=pyqt
 cache:
   directories:
     - $HOME/.cache
@@ -30,7 +42,7 @@ before_install:
   - ccache -s
   - pip install --upgrade pip
   - export PATH=/usr/lib/ccache:${PATH}
-  - ./build_pyside_wheel.sh
+  - if [[ ${QT_API} == 'pyside' ]]; then ./build_pyside_wheel.sh; fi
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 install:

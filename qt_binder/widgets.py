@@ -14,17 +14,17 @@
 
 from __future__ import division
 
-from collections import Counter
 from math import exp, log
 import operator
 
-from PySide import QtCore, QtGui, QtUiTools
 import six
 
 from traits.api import Any, Callable, Constant, Dict, Enum, Float, Instance, \
     Int, List, NO_COMPARE, Str, Tuple, Undefined, Unicode, on_trait_change
 
 from .binder import Binder, QtDynamicProperty, Rename, Default
+from .qt import QtCore, QtGui
+from .qt.ui_loader import load_ui
 from .raw_widgets import ComboBox, Composite, LineEdit, Slider, binder_registry
 
 
@@ -212,38 +212,6 @@ class EnumDropDown(ComboBox):
                 self.currentIndex = new_index
 
 
-class RecordingUiLoader(QtUiTools.QUiLoader):
-    """ Record the names of widgets as they are created.
-    """
-
-    def __init__(self, *args, **kwds):
-        self.names = Counter()
-        super(RecordingUiLoader, self).__init__(*args, **kwds)
-
-    def to_be_bound(self):
-        """ Return the names of child widgets/layouts to be bound.
-        """
-        names = []
-        for name, count in self.names.items():
-            if count == 1 and not name.startswith('_'):
-                names.append(name)
-        return names
-
-    def createLayout(self, className, parent=None, name=u''):
-        if name:
-            self.names[name] += 1
-        layout = super(RecordingUiLoader, self).createLayout(
-            className, parent, name)
-        return layout
-
-    def createWidget(self, className, parent=None, name=u''):
-        if name:
-            self.names[name] += 1
-        widget = super(RecordingUiLoader, self).createWidget(
-            className, parent, name)
-        return widget
-
-
 class UIFile(Composite):
     """ Load a layout from a Qt Designer `.ui` file.
 
@@ -266,9 +234,8 @@ class UIFile(Composite):
         super(UIFile, self).__init__(filename=filename, **traits)
 
     def construct(self, *args, **kwds):
-        loader = RecordingUiLoader()
-        qobj = loader.load(self.filename)
-        for name in loader.to_be_bound():
+        qobj, to_be_bound = load_ui(self.filename)
+        for name in to_be_bound:
             obj = qobj.findChild(QtCore.QObject, name)
             self.add_trait(name, Instance(Binder))
             if name in self.overrides:
