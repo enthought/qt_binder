@@ -13,6 +13,7 @@
 #------------------------------------------------------------------------------
 
 from collections import Counter, deque
+import keyword
 import weakref
 
 import six
@@ -55,6 +56,17 @@ def _guard_against_null_variant(value):
     return value
 
 
+def _python_name_for_qt_name(qname):
+    """ Convert forbidden Qt names to valid Python names, following PySide/PyQt
+    rules.
+
+    E.g. 'raise' -> 'raise_'
+    """
+    if keyword.iskeyword(qname):
+        qname += '_'
+    return qname
+
+
 class QtTrait(TraitType):
     """ Base class for Qt proxy traits on :class:`~.Binder` classes.
 
@@ -89,6 +101,7 @@ class QtTrait(TraitType):
         qobj = object.qobj
         slot = _slot_for(weakref.ref(object), name)
         object.__dict__[slot.__name__] = slot
+        # Use the classmethod form for PyQt4 compatibility.
         QtCore.QObject.connect(qobj, self.signal, slot)
 
     def disconnect_signal(self, object, name):
@@ -100,6 +113,7 @@ class QtTrait(TraitType):
         slot_name = _slot_name(name)
         slot = object.__dict__.pop(slot_name, None)
         if slot is not None:
+            # Use the classmethod form for PyQt4 compatibility.
             QtCore.QObject.disconnect(object.qobj, self.signal, slot)
 
 
@@ -228,7 +242,7 @@ class QtGetterSetter(QtTrait):
                 msg = ("Getter {0!r} not available until Binder is given "
                        "its QObject.".format(name))
                 raise AttributeError(msg)
-        return getattr(qobj, self.getter_name)()
+        return getattr(qobj, _python_name_for_qt_name(self.getter_name))()
 
     def set(self, object, name, value):
         """ Set the value of this trait and notify listeners.
@@ -239,7 +253,7 @@ class QtGetterSetter(QtTrait):
             d[name] = value
             return
         old = self.get(object, name)
-        getattr(qobj, self.setter_name)(value)
+        getattr(qobj, _python_name_for_qt_name(self.setter_name))(value)
         object.trait_property_changed(name, old, value)
 
 
@@ -266,7 +280,7 @@ class QtSlot(QtTrait):
     def get(self, object, name):
         """ Get the underlying method object.
         """
-        return getattr(object.qobj, self.qname)
+        return getattr(object.qobj, _python_name_for_qt_name(self.qname))
 
     def set(self, object, name, value):
         """ Set the value of this trait.
@@ -279,7 +293,7 @@ class QtSlot(QtTrait):
             d[name] = value
             return
         args = self._process_args(value)
-        getattr(qobj, self.qname)(*args)
+        getattr(qobj, _python_name_for_qt_name(self.qname))(*args)
 
     def _process_args(self, value):
         if self.n_args == 0:
@@ -498,9 +512,12 @@ class Binder(HasStrictTraits):
             seen = set(binder_class.class_trait_names())
             for i in range(meta_object.propertyCount()):
                 meta_prop = meta_object.property(i)
-                name = meta_prop.name()
-                name = renamings.get(name, name)
+                qname = _python_name_for_qt_name(meta_prop.name())
+                name = renamings.get(qname, qname)
                 if name not in seen:
+                    if name.endswith('_'):
+                        # See #21
+                        continue
                     binder_class.add_class_trait(name, QtProperty(meta_prop))
                     seen.add(name)
 
@@ -509,20 +526,25 @@ class Binder(HasStrictTraits):
             method_name_counts = Counter()
             for i in range(meta_object.methodCount()):
                 meta_meth = meta_object.method(i)
-                name = meta_meth.signature().split('(')[0]
-                name = renamings.get(name, name)
+                qname = _python_name_for_qt_name(
+                    meta_meth.signature().split('(')[0])
+                name = renamings.get(qname, qname)
                 method_names.append(name)
                 method_name_counts[name] += 1
             for i in range(meta_object.methodCount()):
                 meta_meth = meta_object.method(i)
-                name = meta_meth.signature().split('(')[0]
-                name = renamings.get(name, name)
+                qname = _python_name_for_qt_name(
+                    meta_meth.signature().split('(')[0])
+                name = renamings.get(qname, qname)
                 if method_name_counts[name] > 1:
                     # Add the argument types to the name to disambiguate.
                     arg_types = [str(t).rstrip('*')
                                  for t in meta_meth.parameterTypes()]
                     name = '_'.join([name] + arg_types)
                 if name not in seen:
+                    if name.endswith('_'):
+                        # See #21
+                        continue
                     method_type = meta_meth.methodType()
                     if method_type == meta_meth.Signal:
                         trait = QtSignal(meta_meth)
@@ -541,18 +563,21 @@ class Binder(HasStrictTraits):
                         type(class_attr).__name__ == 'methoddescriptor'):
                     methods.add(name)
             methods.difference_update(seen)
-            for name in methods:
+            for qname in methods:
                 # FIXME: We do not know if these are true getter/setters, where
                 # the getter has 0 arguments and the setter has just the 1. For
                 # example, `QObject.property(name)` and
                 # `QObject.setProperty(name, value)` get misidentified here.
                 # Unfortunately, the method objects do not have any information
                 # about their argument structure.
-                putative_setter = 'set' + name.title()
+                putative_setter = 'set' + qname.title()
                 if putative_setter in methods:
-                    trait_name = renamings.get(name, name)
+                    name = renamings.get(qname, qname)
+                    if name.endswith('_'):
+                        # See #21
+                        continue
                     binder_class.add_class_trait(
-                        trait_name, QtGetterSetter(name, putative_setter))
+                        name, QtGetterSetter(qname, putative_setter))
             setattr(binder_class, initialized_name, True)
 
     def _qobj_changed(self, old, new):

@@ -251,6 +251,7 @@ class TestBinder(unittest.TestCase):
             what_is_this = Rename('whatsThis', default=u'Foo')
             object_name = Rename('objectName')
             the_layout = Rename('layout')
+            py_raise = Rename('raise_')
 
         class SubWidget(Widget):
             pass
@@ -266,6 +267,8 @@ class TestBinder(unittest.TestCase):
             self.assertEqual(w.qobj.whatsThis(), u'Foo')
             self.assertEqual(w.object_name, w.qobj.objectName())
             self.assertEqual(w.the_layout, None)
+            self.assertEqual(w.py_raise, w.qobj.raise_)
+            self.assertNotIn('raise', sorted(w.class_traits()))
             with self.assertRaises(AttributeError):
                 w.whatsThis
             with self.assertRaises(AttributeError):
