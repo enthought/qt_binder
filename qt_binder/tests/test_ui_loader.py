@@ -15,6 +15,8 @@
 import os
 import unittest
 
+from pyface.ui.qt4.util.modal_dialog_tester import ModalDialogTester
+from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from traits.api import HasStrictTraits, Unicode, pop_exception_handler, \
     push_exception_handler
 from traitsui.api import View
@@ -28,17 +30,15 @@ def localfile(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
 
-class TestUiLoader(unittest.TestCase):
+class TestUiLoader(unittest.TestCase, GuiTestAssistant):
 
     def setUp(self):
-        # Start up a QApplication if needed.
-        self.app = QtGui.QApplication.instance()
-        if self.app is None:
-            self.app = QtGui.QApplication([])
+        super(TestUiLoader, self).setUp()
         push_exception_handler(reraise_exceptions=True)
 
     def tearDown(self):
         pop_exception_handler()
+        super(TestUiLoader, self).setUp()
 
     def test_load_ui_file(self):
 
@@ -61,8 +61,27 @@ class TestUiLoader(unittest.TestCase):
                 return traits_view
 
         m = _Model()
-        ui = m.edit_traits()
-        self.assertIsNotNone(ui)
+        tester = ModalDialogTester(lambda: m.edit_traits(kind='livemodal'))
+
+        def _test(tester):
+            # Send valid and invalid data through the model to see if it
+            # propagates to our overridden widget correctly.
+            try:
+                w = tester.find_qt_widget(
+                    type_=QtGui.QLineEdit,
+                    test=lambda w: w.objectName() == u'lineEdit',
+                )
+                self.assertEqual(m.text, w.text())
+                m.text = u'10'
+                self.assertEqual(w.text(), u'10')
+                self.assertEqual(w.property('valid'), True)
+                m.text = u'abc'
+                self.assertEqual(w.text(), u'abc')
+                self.assertEqual(w.property('valid'), False)
+            finally:
+                tester.close(accept=True)
+
+        tester.open_and_run(when_opened=_test)
 
 
 if __name__ == '__main__':
