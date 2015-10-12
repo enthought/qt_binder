@@ -1,2 +1,2 @@
-doc_requirements.txt
+-r doc_requirements.txt
 git+http://github.com/enthought/traitsui.git#egg=traitsui
