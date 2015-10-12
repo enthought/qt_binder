@@ -36,7 +36,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'docstyle',
-    'traits.util.trait_documenter',
+    'trait_documenter',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
