@@ -1,5 +1,6 @@
 import sys
 
+
 def mock_modules():
     """ Mock missing modules if necessary """
 
@@ -17,6 +18,8 @@ def mock_modules():
             'qt_binder.qt.ui_loader',
             'pyface.qt']
         MOCK_TYPES = []
+    else:
+        del qt
 
     TYPES = {
         mock_type: type(mock_type, bases, {'__module__': path})
