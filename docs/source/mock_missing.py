@@ -66,4 +66,4 @@ def mock_modules():
 
     sys.modules.update(
         (mod_name, DocMock(mocked_name=mod_name)) for mod_name in MOCK_MODULES)
-    print 'mocking modules {} and types {}'.format(MOCK_MODULES, MOCK_TYPES)
+    print('mocking modules {} and types {}'.format(MOCK_MODULES, MOCK_TYPES))
