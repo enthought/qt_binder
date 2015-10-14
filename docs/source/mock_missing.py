@@ -57,8 +57,14 @@ def mock_modules():
         def __call__(self, *args, **kwards):
             return DocMock()
 
-        def __contains__(self, item):
-            return False
+        def __iter__(self, item):
+            return self
+
+        def __next__(self):
+            raise StopIteration()
+
+        def next(self):
+            raise StopIteration()
 
         @property
         def __name__(self):
