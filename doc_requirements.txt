@@ -1,4 +1,5 @@
 # pip requirements for building the docs
 Sphinx
+trait_documenter
 git+https://github.com/enthought/enthought-sphinx-theme.git#egg=enthought-sphinx-theme
 git+https://github.com/enthought/sectiondoc.git#egg=sectiondoc
