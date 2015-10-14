@@ -57,7 +57,7 @@ def mock_modules():
         def __call__(self, *args, **kwards):
             return DocMock()
 
-        def __iter__(self, item):
+        def __iter__(self):
             return self
 
         def __next__(self):
