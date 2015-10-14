@@ -57,6 +57,9 @@ def mock_modules():
         def __call__(self, *args, **kwards):
             return DocMock()
 
+        def __contains__(self, item):
+            return False
+
         @property
         def __name__(self):
             return self.__docmock_name__
