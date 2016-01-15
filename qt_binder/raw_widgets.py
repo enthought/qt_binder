@@ -354,18 +354,6 @@ class DockWidget(Binder):
     qclass = QtGui.QDockWidget
 
 
-class LayoutItem(Binder):
-    qclass = QtGui.QLayoutItem
-
-
-class WidgetItem(LayoutItem):
-    qclass = QtGui.QWidgetItem
-
-
-class SpacerItem(LayoutItem):
-    qclass = QtGui.QSpacerItem
-
-
 class Layout(NChildren):
     """ Base class for all `QLayouts`.
     """
@@ -421,8 +409,8 @@ class BoxLayout(Layout):
         for child in self.child_binders:
             if isinstance(child.qobj, QtGui.QWidget):
                 qobj.addWidget(child.qobj)
-            elif isinstance(child.qobj, QtGui.QLayoutItem):
-                qobj.addItem(child.qobj)
+            elif isinstance(child.qobj, QtGui.QLayout):
+                qobj.addLayout(child.qobj)
 
 
 class VBoxLayout(BoxLayout):
