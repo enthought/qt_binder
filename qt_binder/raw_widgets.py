@@ -421,8 +421,10 @@ class BoxLayout(Layout):
         for child in self.child_binders:
             if isinstance(child.qobj, QtGui.QWidget):
                 qobj.addWidget(child.qobj)
-            elif isinstance(child.qobj, QtGui.QLayoutItem):
+            elif isinstance(child.qobj, QtGui.QLayout):
                 qobj.addLayout(child.qobj)
+            elif isinstance(child.qobj, QtGui.QLayoutItem):
+                qobj.addItem(child.qobj)
 
 
 class VBoxLayout(BoxLayout):
