@@ -16,7 +16,7 @@
 import unittest
 
 from ..qt import QtGui
-from ..raw_widgets import HBoxLayout, VBoxLayout
+from ..raw_widgets import GroupBox, HBoxLayout, Label, VBoxLayout
 
 
 class TestBoxLayout(unittest.TestCase):
@@ -39,3 +39,12 @@ class TestBoxLayout(unittest.TestCase):
         self.assertEqual(len(content), 2)
         self.assertIsInstance(content[0], QtGui.QHBoxLayout)
         self.assertIsInstance(content[1], QtGui.QVBoxLayout)
+
+    def test_widget_inside_nested_layout_has_parent(self):
+        # Regression test for a bug that prevented a widget inside nested
+        # layouts from begin displayed.
+        label = Label()
+        box = GroupBox(VBoxLayout(VBoxLayout(label)))
+        box.construct()
+        box.configure()
+        self.assertIs(label.qobj.parent(), box.qobj)
