@@ -422,7 +422,7 @@ class BoxLayout(Layout):
             if isinstance(child.qobj, QtGui.QWidget):
                 qobj.addWidget(child.qobj)
             elif isinstance(child.qobj, QtGui.QLayoutItem):
-                qobj.addItem(child.qobj)
+                qobj.addLayout(child.qobj)
 
 
 class VBoxLayout(BoxLayout):
