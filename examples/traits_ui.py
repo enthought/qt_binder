@@ -16,7 +16,7 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  # noqa
 
 from traits.api import HasTraits, Range
 from traitsui.api import Item, View
