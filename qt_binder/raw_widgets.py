@@ -421,7 +421,7 @@ class BoxLayout(Layout):
         for child in self.child_binders:
             if isinstance(child.qobj, QtGui.QWidget):
                 qobj.addWidget(child.qobj)
-            elif isinstance(child.obj, QtGui.QLayoutItem):
+            elif isinstance(child.qobj, QtGui.QLayoutItem):
                 qobj.addItem(child.qobj)
 
 
