@@ -1,0 +1,15 @@
+Traits CHANGELOG
+================
+
+Release 0.1.1
+-------------
+
+Fixes
+
+* Fix issues with creation of nested box layouts (#24, #28)
+
+
+Release 0.1
+-----------
+
+`qt_binder` is born!
