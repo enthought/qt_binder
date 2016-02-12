@@ -57,5 +57,11 @@ else:
 
         loader = RecordingUiLoader()
         ui = loader.load(path)
+        names = loader.to_be_bound()
+        # Exclude the root object from this list as it is always bound to the
+        # UIFile itself.
+        self_name = ui.objectName()
+        if self_name in names:
+            names.remove(self_name)
 
-        return ui, loader.to_be_bound()
+        return ui, names
