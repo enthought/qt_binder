@@ -327,18 +327,20 @@ class SingleChild(Composite):
 
     child = Instance(Binder)
 
-    def __init__(self, child, **traits):
+    def __init__(self, child=None, **traits):
         super(SingleChild, self).__init__(child=child, **traits)
 
     def construct(self):
-        self.child.construct()
+        if self.child is not None:
+            self.child.construct()
         super(SingleChild, self).construct()
 
     def configure(self):
-        if isinstance(self.child.qobj, QtGui.QWidget):
-            self.child.qobj.setParent(self.qobj)
-        elif isinstance(self.child.qobj, QtGui.QLayout):
-            self.qobj.setLayout(self.child.qobj)
+        if self.child is not None:
+            if isinstance(self.child.qobj, QtGui.QWidget):
+                self.child.qobj.setParent(self.qobj)
+            elif isinstance(self.child.qobj, QtGui.QLayout):
+                self.qobj.setLayout(self.child.qobj)
         super(SingleChild, self).configure()
 
 
