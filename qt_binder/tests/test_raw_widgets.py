@@ -48,3 +48,9 @@ class TestBoxLayout(unittest.TestCase):
         box.construct()
         box.configure()
         self.assertIs(label.qobj.parent(), box.qobj)
+
+    def test_group_box_can_be_childless(self):
+        box = GroupBox()
+        box.construct()
+        box.configure()
+        self.assertIsInstance(box.qobj, QtGui.QGroupBox)
