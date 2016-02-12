@@ -683,9 +683,11 @@ class ButtonGroup(Binder):
 # These classes are not intended to be automatically looked up from their Qt
 # classes.
 _EXCLUDE_FROM_REGISTRY = [
+    Composite,
+    NChildren,
     SingleChild,
-    WithLayout,
     SpanGridLayout,
+    WithLayout,
 ]
 
 
