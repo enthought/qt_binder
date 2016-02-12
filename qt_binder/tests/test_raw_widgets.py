@@ -16,7 +16,8 @@
 import unittest
 
 from ..qt import QtGui
-from ..raw_widgets import GroupBox, HBoxLayout, Label, VBoxLayout
+from ..raw_widgets import BasicGridLayout, GroupBox, HBoxLayout, Label, \
+    VBoxLayout, Widget, binder_registry
 
 
 class TestBoxLayout(unittest.TestCase):
@@ -48,3 +49,14 @@ class TestBoxLayout(unittest.TestCase):
         box.construct()
         box.configure()
         self.assertIs(label.qobj.parent(), box.qobj)
+
+
+class TestBinderRegistry(unittest.TestCase):
+
+    def test_lookup_widget(self):
+        self.assertIs(binder_registry.lookup_by_type(QtGui.QWidget),
+                      Widget)
+
+    def test_lookup_grid_layout(self):
+        self.assertIs(binder_registry.lookup_by_type(QtGui.QGridLayout),
+                      BasicGridLayout)

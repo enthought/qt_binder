@@ -680,7 +680,18 @@ class ButtonGroup(Binder):
                 self.qobj.addButton(button, qt_id)
 
 
+# These classes are not intended to be automatically looked up from their Qt
+# classes.
+_EXCLUDE_FROM_REGISTRY = [
+    SingleChild,
+    WithLayout,
+    SpanGridLayout,
+]
+
+
 for obj in vars().values():
+    if obj in _EXCLUDE_FROM_REGISTRY:
+        continue
     if (isinstance(obj, type) and
             issubclass(obj, Binder) and
             obj is not Binder):
