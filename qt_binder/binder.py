@@ -343,8 +343,13 @@ class QtSignal(QtSlot):
             d[name] = value
             return
         args = self._process_args(value)
-        # Use the QMetaMethod to invoke the signal for PyQt4 compatibility.
-        self.meta_method.invoke(qobj, *args)
+        if len(args) == 0:
+            # Use the QMetaMethod to invoke the signal for PyQt4 compatibility.
+            self.meta_method.invoke(qobj)
+        else:
+            # In both PyQt4 and PySide, QMetaMethod.invoke() does not
+            # automatically convert the arguments, so emit it directly.
+            getattr(qobj, name).emit(*args)
 
 
 class Rename(object):
