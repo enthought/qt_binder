@@ -48,13 +48,13 @@ class TestTextField(unittest.TestCase, GuiTestAssistant, UnittestTools):
             field.validator = QtGui.QIntValidator(30, 50)
 
             # Set the text field in an invalid state.
-            field.trait_property_changed('textEdited', Undefined, '10')
+            field.qobj.textEdited.emit('10')
             self.assertEqual(field.value, '10')
             self.assertEqual(field.valid, False)
 
             # In 'auto' mode, the value and the validity should update
             # automatically even before the user presses "Enter".
-            field.trait_property_changed('textEdited', Undefined, '40')
+            field.qobj.textEdited.emit('40')
             self.assertEqual(field.value, '40')
             self.assertEqual(field.valid, True)
         finally:
@@ -94,8 +94,7 @@ class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
             self.assertEqual(slider.value, 0)
             self.assertEqual(slider.slider.value, 0)
             slider.field.text = '20'
-            slider.field.trait_property_changed(
-                'editingFinished', Undefined, True)
+            slider.field.editingFinished = True
             self.assertEqual(slider.value, 20)
             self.assertEqual(slider.slider.value, 20)
         finally:
@@ -116,13 +115,13 @@ class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
 
             # State is Intermediate.
             field.text = '1'
-            field.trait_property_changed('editingFinished', Undefined, True)
+            field.editingFinished = True
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
 
             # State is Invalid.
             field.text = '-1'
-            field.trait_property_changed('editingFinished', Undefined, True)
+            field.editingFinished = True
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
         finally:
