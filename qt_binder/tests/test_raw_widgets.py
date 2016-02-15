@@ -50,6 +50,7 @@ class TestBoxLayout(unittest.TestCase):
         box.configure()
         self.assertIs(label.qobj.parent(), box.qobj)
 
+
 class TestBinderRegistry(unittest.TestCase):
 
     def test_lookup_object(self):
@@ -78,5 +79,7 @@ class TestGroupBox(unittest.TestCase):
         box = GroupBox()
         box.construct()
         box.configure()
-        _ = box.alignment
+        # Test getting.
+        box.alignment
+        # Test setting.
         box.alignment = QtCore.Qt.AlignLeft
