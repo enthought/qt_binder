@@ -14,6 +14,7 @@
 
 import unittest
 
+from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from traits.api import Undefined, pop_exception_handler, push_exception_handler
 from traits.testing.unittest_tools import UnittestTools
 
@@ -31,13 +32,15 @@ class TestTextField(unittest.TestCase, UnittestTools):
             field.value = u''
 
 
-class TestRangeSlider(unittest.TestCase):
+class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
 
     def setUp(self):
+        GuiTestAssistant.setUp(self)
         push_exception_handler(reraise_exceptions=True)
 
     def tearDown(self):
         pop_exception_handler()
+        GuiTestAssistant.tearDown(self)
 
     def test_initialization(self):
         # With a random hash seed, this would fail randomly if we didn't take
@@ -56,8 +59,38 @@ class TestRangeSlider(unittest.TestCase):
 
     def test_field_text_edited(self):
         slider = RangeSlider()
-        self.assertEqual(slider.value, 0)
-        self.assertEqual(slider.slider.value, 0)
-        slider.field.trait_property_changed('textEdited', Undefined, 20)
-        self.assertEqual(slider.value, 20)
-        self.assertEqual(slider.slider.value, 20)
+        slider.construct()
+        try:
+            slider.configure()
+            self.assertEqual(slider.value, 0)
+            self.assertEqual(slider.slider.value, 0)
+            slider.field.trait_property_changed('textEdited', Undefined, '20')
+            self.assertEqual(slider.value, 20)
+            self.assertEqual(slider.slider.value, 20)
+        finally:
+            slider.dispose()
+
+    def test_validator_states(self):
+        # When the validator is Invalid or Intermediate, the value of the
+        # RangeSlider should not change.
+        range_slider = RangeSlider(range=(30, 60), value=50)
+        range_slider.construct()
+        try:
+            range_slider.configure()
+            slider= range_slider.slider
+            field = range_slider.field
+
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
+
+            # State is Intermediate.
+            range_slider.field.trait_property_changed('textEdited', Undefined, '1')
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
+
+            # State is Invalid.
+            range_slider.field.trait_property_changed('textEdited', Undefined, '-10')
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
+        finally:
+            range_slider.dispose()
