@@ -64,35 +64,20 @@ class TestBinderRegistry(unittest.TestCase):
 class TestGroupBox(BaseTestWithGui, unittest.TestCase):
 
     def test_group_box_can_be_childless(self):
-        box = GroupBox()
-        box.construct()
-        try:
-            box.configure()
+        with self.constructed(GroupBox()) as box:
             self.assertIsInstance(box.qobj, QtGui.QGroupBox)
-        finally:
-            box.dispose()
 
     def test_groupbox_alignment_works(self):
         # PySide has a bug. Ensure that we work around it.
-        box = GroupBox()
-        box.construct()
-        try:
-            box.configure()
+        with self.constructed(GroupBox()) as box:
             # Test getting.
             box.alignment
             # Test setting.
             box.alignment = QtCore.Qt.AlignLeft
-        finally:
-            box.dispose()
 
 
 class TestQLineEdit(BaseTestWithGui, unittest.TestCase):
 
     def test_slots_with_arguments_work(self):
-        le = LineEdit()
-        le.construct()
-        try:
-            le.configure()
+        with self.constructed(LineEdit()) as le:
             le.textEdited = u'text'
-        finally:
-            le.dispose()

@@ -32,10 +32,7 @@ class TestTextField(unittest.TestCase, BaseTestWithGui, UnittestTools):
             field.value = u''
 
     def test_validity_in_auto_mode(self):
-        field = TextField(mode='auto')
-        field.construct()
-        try:
-            field.configure()
+        with self.constructed(TextField(mode='auto')) as field:
             field.validator = QtGui.QIntValidator(30, 50)
 
             # Set the text field in an invalid state.
@@ -48,8 +45,6 @@ class TestTextField(unittest.TestCase, BaseTestWithGui, UnittestTools):
             field.textEdited = '40'
             self.assertEqual(field.value, '40')
             self.assertEqual(field.valid, True)
-        finally:
-            field.dispose()
 
 
 class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
@@ -70,26 +65,19 @@ class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
         self.assertEqual(slider.field.text, u'20')
 
     def test_field_text_edited(self):
-        slider = RangeSlider()
-        slider.construct()
-        try:
-            slider.configure()
+        with self.constructed(RangeSlider()) as slider:
             self.assertEqual(slider.value, 0)
             self.assertEqual(slider.slider.value, 0)
             slider.field.text = '20'
             slider.field.editingFinished = True
             self.assertEqual(slider.value, 20)
             self.assertEqual(slider.slider.value, 20)
-        finally:
-            slider.dispose()
 
     def test_validator_states(self):
         # When the validator is Invalid or Intermediate, the value of the
         # RangeSlider should not change.
         range_slider = RangeSlider(range=(30, 60), value=50)
-        range_slider.construct()
-        try:
-            range_slider.configure()
+        with self.constructed(range_slider):
             slider = range_slider.slider
             field = range_slider.field
 
@@ -107,5 +95,3 @@ class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
             field.editingFinished = True
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
-        finally:
-            range_slider.dispose()
