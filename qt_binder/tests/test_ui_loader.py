@@ -38,7 +38,7 @@ class TestUiLoader(unittest.TestCase, GuiTestAssistant):
 
     def tearDown(self):
         pop_exception_handler()
-        super(TestUiLoader, self).setUp()
+        super(TestUiLoader, self).tearDown()
 
     def test_load_ui_file(self):
 
