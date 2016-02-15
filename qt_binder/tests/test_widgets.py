@@ -16,8 +16,8 @@ import unittest
 
 from traits.testing.unittest_tools import UnittestTools
 
-from .test_raw_widgets import _BaseTestWithGui
 from ..qt import QtGui
+from ..testing import _BaseTestWithGui
 from ..widgets import FloatSlider, RangeSlider, TextField
 
 
