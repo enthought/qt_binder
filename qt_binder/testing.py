@@ -3,7 +3,7 @@ from traits.trait_notifiers import pop_exception_handler, \
     push_exception_handler
 
 
-class _BaseTestWithGui(GuiTestAssistant):
+class BaseTestWithGui(GuiTestAssistant):
 
     def setUp(self):
         GuiTestAssistant.setUp(self)

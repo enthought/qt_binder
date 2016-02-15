@@ -17,11 +17,11 @@ import unittest
 from traits.testing.unittest_tools import UnittestTools
 
 from ..qt import QtGui
-from ..testing import _BaseTestWithGui
+from ..testing import BaseTestWithGui
 from ..widgets import FloatSlider, RangeSlider, TextField
 
 
-class TestTextField(unittest.TestCase, _BaseTestWithGui, UnittestTools):
+class TestTextField(unittest.TestCase, BaseTestWithGui, UnittestTools):
 
     def test_traits(self):
         field = TextField()
@@ -52,7 +52,7 @@ class TestTextField(unittest.TestCase, _BaseTestWithGui, UnittestTools):
             field.dispose()
 
 
-class TestRangeSlider(unittest.TestCase, _BaseTestWithGui):
+class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
 
     def test_initialization(self):
         # With a random hash seed, this would fail randomly if we didn't take

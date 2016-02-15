@@ -18,10 +18,10 @@ import unittest
 from ..qt import QtCore, QtGui
 from ..raw_widgets import BasicGridLayout, GroupBox, HBoxLayout, Label, \
     LineEdit, Object, VBoxLayout, Widget, binder_registry
-from ..testing import _BaseTestWithGui
+from ..testing import BaseTestWithGui
 
 
-class TestBoxLayout(_BaseTestWithGui, unittest.TestCase):
+class TestBoxLayout(BaseTestWithGui, unittest.TestCase):
 
     def test_configure_nested_layout(self):
         # Regression test for a bug that prevented layouts from being nested.
@@ -61,7 +61,7 @@ class TestBinderRegistry(unittest.TestCase):
                       BasicGridLayout)
 
 
-class TestGroupBox(_BaseTestWithGui, unittest.TestCase):
+class TestGroupBox(BaseTestWithGui, unittest.TestCase):
 
     def test_group_box_can_be_childless(self):
         box = GroupBox()
@@ -86,7 +86,7 @@ class TestGroupBox(_BaseTestWithGui, unittest.TestCase):
             box.dispose()
 
 
-class TestQLineEdit(_BaseTestWithGui, unittest.TestCase):
+class TestQLineEdit(BaseTestWithGui, unittest.TestCase):
 
     def test_slots_with_arguments_work(self):
         le = LineEdit()
