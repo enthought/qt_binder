@@ -480,12 +480,11 @@ class RangeSlider(Composite):
                 self.value = value
                 self.field.text = self.field_format_func(value)
 
-    @on_trait_change('field:textEdited')
+    @on_trait_change('field:value')
     def _on_field_text(self, text):
         if 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
-                validity, _, _ = self.field.validator.validate(text, 0)
-                if validity == QtGui.QValidator.Acceptable:
+                if self.field.valid:
                     try:
                         value = self._from_text_func(text)
                     except ValueError:

@@ -64,7 +64,9 @@ class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
             slider.configure()
             self.assertEqual(slider.value, 0)
             self.assertEqual(slider.slider.value, 0)
-            slider.field.trait_property_changed('textEdited', Undefined, '20')
+            slider.field.text = '20'
+            slider.field.trait_property_changed(
+                'editingFinished', Undefined, True)
             self.assertEqual(slider.value, 20)
             self.assertEqual(slider.slider.value, 20)
         finally:
@@ -77,19 +79,21 @@ class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
         range_slider.construct()
         try:
             range_slider.configure()
-            slider= range_slider.slider
+            slider = range_slider.slider
             field = range_slider.field
 
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
 
             # State is Intermediate.
-            range_slider.field.trait_property_changed('textEdited', Undefined, '1')
+            field.text = '1'
+            field.trait_property_changed('editingFinished', Undefined, True)
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
 
             # State is Invalid.
-            range_slider.field.trait_property_changed('textEdited', Undefined, '-10')
+            field.text = '-1'
+            field.trait_property_changed('editingFinished', Undefined, True)
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
         finally:
