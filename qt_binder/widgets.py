@@ -407,7 +407,7 @@ class RangeSlider(Composite):
     slider = Instance(BaseSlider, factory=IntSlider, args=())
 
     #: The field widget.
-    field = Instance(LineEdit, args=())
+    field = Instance(TextField, args=())
 
     _low_label = Any()
     _high_label = Any()
