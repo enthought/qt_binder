@@ -50,12 +50,6 @@ class TestBoxLayout(unittest.TestCase):
         box.configure()
         self.assertIs(label.qobj.parent(), box.qobj)
 
-    def test_group_box_can_be_childless(self):
-        box = GroupBox()
-        box.construct()
-        box.configure()
-        self.assertIsInstance(box.qobj, QtGui.QGroupBox)
-
 
 class TestBinderRegistry(unittest.TestCase):
 
@@ -70,3 +64,22 @@ class TestBinderRegistry(unittest.TestCase):
     def test_lookup_grid_layout(self):
         self.assertIs(binder_registry.lookup_by_type(QtGui.QGridLayout),
                       BasicGridLayout)
+
+
+class TestGroupBox(unittest.TestCase):
+
+    def test_group_box_can_be_childless(self):
+        box = GroupBox()
+        box.construct()
+        box.configure()
+        self.assertIsInstance(box.qobj, QtGui.QGroupBox)
+
+    def test_groupbox_alignment_works(self):
+        # PySide has a bug. Ensure that we work around it.
+        box = GroupBox()
+        box.construct()
+        box.configure()
+        # Test getting.
+        box.alignment
+        # Test setting.
+        box.alignment = QtCore.Qt.AlignLeft

@@ -140,7 +140,17 @@ class QtProperty(QtTrait):
                 msg = ("Property {0!r} not available until Binder is given "
                        "its QObject.".format(name))
                 raise AttributeError(msg)
-        value = self.meta_prop.read(qobj)
+        try:
+            value = self.meta_prop.read(qobj)
+        except RuntimeError:
+            # PySide has a bug such that it will not return flags sometimes,
+            # like for QGroupBox.alignment.
+            name = self.meta_prop.name()
+            if hasattr(qobj, name):
+                value = getattr(qobj, name)()
+            else:
+                # Nothing else we can do.
+                raise
         # PyQt4 will sometimes return a QPyNullVariant via this API even if it
         # converts it to the correct null value for the type for the property
         # attribute on the QObject itself.
