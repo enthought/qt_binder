@@ -15,18 +15,26 @@
 
 import unittest
 
+from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
+from traits.api import pop_exception_handler, push_exception_handler
+
 from ..qt import QtCore, QtGui
 from ..raw_widgets import BasicGridLayout, GroupBox, HBoxLayout, Label, \
-    Object, VBoxLayout, Widget, binder_registry
+    LineEdit, Object, VBoxLayout, Widget, binder_registry
 
 
-class TestBoxLayout(unittest.TestCase):
+class _BaseTestWithGui(GuiTestAssistant):
 
     def setUp(self):
-        # Start up a QApplication if needed.
-        self.app = QtGui.QApplication.instance()
-        if self.app is None:
-            self.app = QtGui.QApplication([])
+        GuiTestAssistant.setUp(self)
+        push_exception_handler(reraise_exceptions=True)
+
+    def tearDown(self):
+        pop_exception_handler()
+        GuiTestAssistant.tearDown(self)
+
+
+class TestBoxLayout(_BaseTestWithGui, unittest.TestCase):
 
     def test_configure_nested_layout(self):
         # Regression test for a bug that prevented layouts from being nested.
@@ -66,20 +74,38 @@ class TestBinderRegistry(unittest.TestCase):
                       BasicGridLayout)
 
 
-class TestGroupBox(unittest.TestCase):
+class TestGroupBox(_BaseTestWithGui, unittest.TestCase):
 
     def test_group_box_can_be_childless(self):
         box = GroupBox()
         box.construct()
-        box.configure()
-        self.assertIsInstance(box.qobj, QtGui.QGroupBox)
+        try:
+            box.configure()
+            self.assertIsInstance(box.qobj, QtGui.QGroupBox)
+        finally:
+            box.dispose()
 
     def test_groupbox_alignment_works(self):
         # PySide has a bug. Ensure that we work around it.
         box = GroupBox()
         box.construct()
-        box.configure()
-        # Test getting.
-        box.alignment
-        # Test setting.
-        box.alignment = QtCore.Qt.AlignLeft
+        try:
+            box.configure()
+            # Test getting.
+            box.alignment
+            # Test setting.
+            box.alignment = QtCore.Qt.AlignLeft
+        finally:
+            box.dispose()
+
+
+class TestQLineEdit(_BaseTestWithGui, unittest.TestCase):
+
+    def test_slots_with_arguments_work(self):
+        le = LineEdit()
+        le.construct()
+        try:
+            le.configure()
+            le.textEdited = u'text'
+        finally:
+            le.dispose()
