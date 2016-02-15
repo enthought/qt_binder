@@ -14,23 +14,14 @@
 
 import unittest
 
-from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
-from traits.api import pop_exception_handler, push_exception_handler
 from traits.testing.unittest_tools import UnittestTools
 
+from .test_raw_widgets import _BaseTestWithGui
 from ..qt import QtGui
 from ..widgets import FloatSlider, RangeSlider, TextField
 
 
-class TestTextField(unittest.TestCase, GuiTestAssistant, UnittestTools):
-
-    def setUp(self):
-        GuiTestAssistant.setUp(self)
-        push_exception_handler(reraise_exceptions=True)
-
-    def tearDown(self):
-        pop_exception_handler()
-        GuiTestAssistant.tearDown(self)
+class TestTextField(unittest.TestCase, _BaseTestWithGui, UnittestTools):
 
     def test_traits(self):
         field = TextField()
@@ -48,28 +39,20 @@ class TestTextField(unittest.TestCase, GuiTestAssistant, UnittestTools):
             field.validator = QtGui.QIntValidator(30, 50)
 
             # Set the text field in an invalid state.
-            field.qobj.textEdited.emit('10')
+            field.textEdited = '10'
             self.assertEqual(field.value, '10')
             self.assertEqual(field.valid, False)
 
             # In 'auto' mode, the value and the validity should update
             # automatically even before the user presses "Enter".
-            field.qobj.textEdited.emit('40')
+            field.textEdited = '40'
             self.assertEqual(field.value, '40')
             self.assertEqual(field.valid, True)
         finally:
             field.dispose()
 
 
-class TestRangeSlider(unittest.TestCase, GuiTestAssistant):
-
-    def setUp(self):
-        GuiTestAssistant.setUp(self)
-        push_exception_handler(reraise_exceptions=True)
-
-    def tearDown(self):
-        pop_exception_handler()
-        GuiTestAssistant.tearDown(self)
+class TestRangeSlider(unittest.TestCase, _BaseTestWithGui):
 
     def test_initialization(self):
         # With a random hash seed, this would fail randomly if we didn't take
