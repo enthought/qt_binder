@@ -15,7 +15,7 @@
 import unittest
 
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
-from traits.api import Undefined, pop_exception_handler, push_exception_handler
+from traits.api import pop_exception_handler, push_exception_handler
 from traits.testing.unittest_tools import UnittestTools
 
 from ..qt import QtGui
