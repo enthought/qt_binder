@@ -18,10 +18,19 @@ from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from traits.api import Undefined, pop_exception_handler, push_exception_handler
 from traits.testing.unittest_tools import UnittestTools
 
+from ..qt import QtGui
 from ..widgets import FloatSlider, RangeSlider, TextField
 
 
-class TestTextField(unittest.TestCase, UnittestTools):
+class TestTextField(unittest.TestCase, GuiTestAssistant, UnittestTools):
+
+    def setUp(self):
+        GuiTestAssistant.setUp(self)
+        push_exception_handler(reraise_exceptions=True)
+
+    def tearDown(self):
+        pop_exception_handler()
+        GuiTestAssistant.tearDown(self)
 
     def test_traits(self):
         field = TextField()
@@ -30,6 +39,26 @@ class TestTextField(unittest.TestCase, UnittestTools):
             # The value trait should always fire a notification, even if the
             # value is not different.
             field.value = u''
+
+    def test_validity_in_auto_mode(self):
+        field = TextField(mode='auto')
+        field.construct()
+        try:
+            field.configure()
+            field.validator = QtGui.QIntValidator(30, 50)
+
+            # Set the text field in an invalid state.
+            field.trait_property_changed('textEdited', Undefined, '10')
+            self.assertEqual(field.value, '10')
+            self.assertEqual(field.valid, False)
+
+            # In 'auto' mode, the value and the validity should update
+            # automatically even before the user presses "Enter".
+            field.trait_property_changed('textEdited', Undefined, '40')
+            self.assertEqual(field.value, '40')
+            self.assertEqual(field.valid, True)
+        finally:
+            field.dispose()
 
 
 class TestRangeSlider(unittest.TestCase, GuiTestAssistant):

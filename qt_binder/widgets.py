@@ -55,11 +55,20 @@ class TextField(LineEdit):
     def configure(self):
         self.styleSheet = INVALID_STYLE_RULE
 
+    def _update_valid(self, text):
+        """ Update the valid trait based on validation of ``text``.
+        """
+        validator = self.validator
+        if validator is not None:
+            state, fixed, pos = validator.validate(text, len(text))
+            self.valid = (state == validator.Acceptable)
+
     @on_trait_change('textEdited')
     def _on_textEdited(self, text):
         if (self.mode == 'auto' and
                 'value' not in self.loopback_guard):
             with self.loopback_guard('value'):
+                self._update_valid(text)
                 self.value = text
 
     @on_trait_change('editingFinished')
@@ -70,11 +79,7 @@ class TextField(LineEdit):
 
     @on_trait_change('text,validator')
     def _on_text(self):
-        text = self.text
-        validator = self.validator
-        if validator is not None:
-            state, fixed, pos = validator.validate(text, len(text))
-            self.valid = (state == validator.Acceptable)
+        self._update_valid(self.text)
 
     def _value_changed(self, new):
         if 'value' not in self.loopback_guard:
