@@ -55,11 +55,20 @@ class TextField(LineEdit):
     def configure(self):
         self.styleSheet = INVALID_STYLE_RULE
 
+    def _update_valid(self, text):
+        """ Update the valid trait based on validation of ``text``.
+        """
+        validator = self.validator
+        if validator is not None:
+            state, fixed, pos = validator.validate(text, len(text))
+            self.valid = (state == validator.Acceptable)
+
     @on_trait_change('textEdited')
     def _on_textEdited(self, text):
         if (self.mode == 'auto' and
                 'value' not in self.loopback_guard):
             with self.loopback_guard('value'):
+                self._update_valid(text)
                 self.value = text
 
     @on_trait_change('editingFinished')
@@ -70,11 +79,7 @@ class TextField(LineEdit):
 
     @on_trait_change('text,validator')
     def _on_text(self):
-        text = self.text
-        validator = self.validator
-        if validator is not None:
-            state, fixed, pos = validator.validate(text, len(text))
-            self.valid = (state == validator.Acceptable)
+        self._update_valid(self.text)
 
     def _value_changed(self, new):
         if 'value' not in self.loopback_guard:
@@ -407,7 +412,7 @@ class RangeSlider(Composite):
     slider = Instance(BaseSlider, factory=IntSlider, args=())
 
     #: The field widget.
-    field = Instance(LineEdit, args=())
+    field = Instance(TextField, args=())
 
     _low_label = Any()
     _high_label = Any()
@@ -480,14 +485,15 @@ class RangeSlider(Composite):
                 self.value = value
                 self.field.text = self.field_format_func(value)
 
-    @on_trait_change('field:textEdited')
+    @on_trait_change('field:value')
     def _on_field_text(self, text):
         if 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
-                try:
-                    value = self._from_text_func(text)
-                except ValueError:
-                    pass
-                else:
-                    self.value = value
-                    self.slider.value = value
+                if self.field.valid:
+                    try:
+                        value = self._from_text_func(text)
+                    except ValueError:
+                        pass
+                    else:
+                        self.value = value
+                        self.slider.value = value

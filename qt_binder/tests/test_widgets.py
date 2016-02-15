@@ -14,13 +14,14 @@
 
 import unittest
 
-from traits.api import Undefined, pop_exception_handler, push_exception_handler
 from traits.testing.unittest_tools import UnittestTools
 
+from ..qt import QtGui
+from ..testing import BaseTestWithGui
 from ..widgets import FloatSlider, RangeSlider, TextField
 
 
-class TestTextField(unittest.TestCase, UnittestTools):
+class TestTextField(unittest.TestCase, BaseTestWithGui, UnittestTools):
 
     def test_traits(self):
         field = TextField()
@@ -30,14 +31,23 @@ class TestTextField(unittest.TestCase, UnittestTools):
             # value is not different.
             field.value = u''
 
+    def test_validity_in_auto_mode(self):
+        with self.constructed(TextField(mode='auto')) as field:
+            field.validator = QtGui.QIntValidator(30, 50)
 
-class TestRangeSlider(unittest.TestCase):
+            # Set the text field in an invalid state.
+            field.textEdited = '10'
+            self.assertEqual(field.value, '10')
+            self.assertEqual(field.valid, False)
 
-    def setUp(self):
-        push_exception_handler(reraise_exceptions=True)
+            # In 'auto' mode, the value and the validity should update
+            # automatically even before the user presses "Enter".
+            field.textEdited = '40'
+            self.assertEqual(field.value, '40')
+            self.assertEqual(field.valid, True)
 
-    def tearDown(self):
-        pop_exception_handler()
+
+class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
 
     def test_initialization(self):
         # With a random hash seed, this would fail randomly if we didn't take
@@ -55,9 +65,33 @@ class TestRangeSlider(unittest.TestCase):
         self.assertEqual(slider.field.text, u'20')
 
     def test_field_text_edited(self):
-        slider = RangeSlider()
-        self.assertEqual(slider.value, 0)
-        self.assertEqual(slider.slider.value, 0)
-        slider.field.trait_property_changed('textEdited', Undefined, 20)
-        self.assertEqual(slider.value, 20)
-        self.assertEqual(slider.slider.value, 20)
+        with self.constructed(RangeSlider()) as slider:
+            self.assertEqual(slider.value, 0)
+            self.assertEqual(slider.slider.value, 0)
+            slider.field.text = '20'
+            slider.field.editingFinished = True
+            self.assertEqual(slider.value, 20)
+            self.assertEqual(slider.slider.value, 20)
+
+    def test_validator_states(self):
+        # When the validator is Invalid or Intermediate, the value of the
+        # RangeSlider should not change.
+        range_slider = RangeSlider(range=(30, 60), value=50)
+        with self.constructed(range_slider):
+            slider = range_slider.slider
+            field = range_slider.field
+
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
+
+            # State is Intermediate.
+            field.text = '1'
+            field.editingFinished = True
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
+
+            # State is Invalid.
+            field.text = '-1'
+            field.editingFinished = True
+            self.assertEqual(slider.value, 50)
+            self.assertEqual(range_slider.value, 50)
