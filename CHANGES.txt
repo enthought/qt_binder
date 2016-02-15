@@ -1,6 +1,20 @@
 Traits CHANGELOG
 ================
 
+Release 0.1.2
+-------------
+
+Fixes
+
+* Fix validation of RangeSlider (#39)
+* Work around PySide bug with emitting events with arguments (#40)
+* Workaround PySide bug with setting some QObject properies (#37)
+* Ignore named root object when loading a .ui file (#35)
+* Exclude auxiliary classes that from Binder registry as they were not
+  intended to be looked up (#32)
+* Allow SingleChild to be childless (#33)
+
+
 Release 0.1.1
 -------------
 
