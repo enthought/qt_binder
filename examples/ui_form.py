@@ -21,7 +21,7 @@ from traitsui.api import View
 
 from qt_binder.bound_editor import Bound
 from qt_binder.qt import QtGui
-from qt_binder.widgets import TextField, UIFile
+from qt_binder.widgets import RangeSlider, TextField, UIFile
 
 
 def localfile(filename):
@@ -46,11 +46,14 @@ class Model(HasStrictTraits):
                     overrides=dict(
                         lineEdit=TextField(validator=QtGui.QIntValidator()),
                     ),
+                    insertions=dict(
+                        slider=RangeSlider(range=(-10, 10)),
+                    ),
                 ),
                 'lineEdit.value := object.text',
                 'dial.value := object.degrees',
                 'dial_value.text << format_deg(object.degrees)',
-                'horizontalSlider.value := object.slider_value',
+                'slider.value := object.slider_value',
                 extra_context=dict(
                     format_deg=format_deg,
                 ),
