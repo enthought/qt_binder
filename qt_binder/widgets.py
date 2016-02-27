@@ -258,9 +258,14 @@ class UIFile(Composite):
             elif name in self.insertions:
                 binder = self.insertions[name]
                 binder.construct()
-                layout = QtGui.QVBoxLayout()
+                old_layout = obj.layout()
+                if old_layout is not None:
+                    # Qt hack to replace the layout. We need to ensure that the
+                    # old one is truly deleted. Reparent it onto a widget that
+                    # we then discard.
+                    QtGui.QWidget().setLayout(old_layout)
+                layout = QtGui.QVBoxLayout(obj)
                 layout.setContentsMargins(0, 0, 0, 0)
-                obj.setLayout(layout)
                 layout.addWidget(binder.qobj)
             else:
                 binder = binder_registry.lookup(obj)()
