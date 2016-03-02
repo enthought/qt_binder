@@ -225,6 +225,12 @@ class UIFile(Composite):
     will be consulted to find the raw :class:`~.Binder` to use for each widget.
     This can be overridden for any named widget using the :attr:`overrides`
     trait.
+
+    In case one wants to let the :class:`~.Binder` to own its widget but just
+    use the `.ui` file for layout, use the :attr:`insertions` dictionary. The
+    named widget should be a plain `QWidget` in the UI laid out as desired. The
+    :class:`~.Binder` will create a new widget as the lone child of this
+    widget and take up all of its space.
     """
 
     qclass = QtGui.QWidget
@@ -234,6 +240,9 @@ class UIFile(Composite):
 
     #: Override binders for named widgets.
     overrides = Dict(Str, Instance(Binder))
+
+    #: Insert binders as children of the named QWidgets.
+    insertions = Dict(Str, Instance(Binder))
 
     def __init__(self, filename, **traits):
         super(UIFile, self).__init__(filename=filename, **traits)
@@ -245,9 +254,22 @@ class UIFile(Composite):
             self.add_trait(name, Instance(Binder))
             if name in self.overrides:
                 binder = self.overrides[name]
+                binder.qobj = obj
+            elif name in self.insertions:
+                binder = self.insertions[name]
+                binder.construct()
+                old_layout = obj.layout()
+                if old_layout is not None:
+                    # Qt hack to replace the layout. We need to ensure that the
+                    # old one is truly deleted. Reparent it onto a widget that
+                    # we then discard.
+                    QtGui.QWidget().setLayout(old_layout)
+                layout = QtGui.QVBoxLayout(obj)
+                layout.setContentsMargins(0, 0, 0, 0)
+                layout.addWidget(binder.qobj)
             else:
                 binder = binder_registry.lookup(obj)()
-            binder.qobj = obj
+                binder.qobj = obj
             setattr(self, name, binder)
         self.qobj = qobj
 
