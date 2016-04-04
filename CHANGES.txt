@@ -1,6 +1,14 @@
 Traits CHANGELOG
 ================
 
+Release 0.2
+-----------
+
+Features
+
+* Insert Binders into UIFile in addition to mere overrides (#42)
+
+
 Release 0.1.2
 -------------
 
