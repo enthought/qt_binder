@@ -1,0 +1,7 @@
+include *.txt *.rst
+include tox.ini
+graft docs
+prune docs/build
+recursive-exclude docs *.pyc
+graft examples
+recursive-exclude examples *.pyc
