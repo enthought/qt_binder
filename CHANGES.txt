@@ -1,5 +1,13 @@
-Traits CHANGELOG
-================
+QtBinder CHANGELOG
+==================
+
+Release 0.2.1
+-------------
+
+Fixes
+
+* Add ``install_requires`` (#46)
+
 
 Release 0.2
 -----------
@@ -34,4 +42,4 @@ Fixes
 Release 0.1
 -----------
 
-`qt_binder` is born!
+``qt_binder`` is born!
