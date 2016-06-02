@@ -25,4 +25,10 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     use_2to3=True,
+    install_requires=[
+        'six',
+        'traits',
+        'pyface',
+        'traitsui',
+    ],
 )
