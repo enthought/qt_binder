@@ -226,7 +226,7 @@ class TypeRegistry(object):
                     return objs
 
         # None of the concrete superclasses. Check the ABCs.
-        for abstract, objs in self.abc_map.iteritems():
+        for abstract, objs in six.iteritems(self.abc_map):
             if issubclass(typ, abstract) and objs:
                 return objs
 

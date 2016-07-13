@@ -33,6 +33,19 @@ NULL_VARIANT_VALUES = {
 }
 
 
+def _to_str(t):
+    if isinstance(t, QtCore.QByteArray):
+        try:
+            # PyQt4
+            t = bytes(t).decode()
+        except TypeError:
+            # PySide
+            t = str(t)
+    else:
+        t = str(t)
+    return t
+
+
 def _slot_name(name):
     return '_{}_property_changed'.format(name)
 
@@ -553,7 +566,7 @@ class Binder(HasStrictTraits):
                 name = renamings.get(qname, qname)
                 if method_name_counts[name] > 1:
                     # Add the argument types to the name to disambiguate.
-                    arg_types = [str(t).rstrip('*')
+                    arg_types = [_to_str(t).rstrip('*')
                                  for t in meta_meth.parameterTypes()]
                     name = '_'.join([name] + arg_types)
                 if name not in seen:
