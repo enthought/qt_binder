@@ -35,7 +35,12 @@ NULL_VARIANT_VALUES = {
 
 def _to_str(t):
     if isinstance(t, QtCore.QByteArray):
-        t = bytes(t).decode()
+        try:
+            # PyQt4
+            t = bytes(t).decode()
+        except TypeError:
+            # PySide
+            t = str(t)
     else:
         t = str(t)
     return t
