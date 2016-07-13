@@ -15,6 +15,7 @@
 """
 
 import abc
+import six
 
 
 class A(object):
@@ -37,8 +38,9 @@ class Mixed(A, D):
     pass
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Abstract(object):
-    __metaclass__ = abc.ABCMeta
+    pass
 
 
 class Concrete(object):
