@@ -70,10 +70,16 @@ class TestGroupBox(BaseTestWithGui, unittest.TestCase):
     def test_groupbox_alignment_works(self):
         # PySide has a bug. Ensure that we work around it.
         with self.constructed(GroupBox()) as box:
+            # In particular, combined flags like this don't seem to work
+            # through the meta_prop mechanism.
+            new_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
             # Test getting.
-            box.alignment
+            orig = box.alignment
+            self.assertNotEqual(orig, new_alignment)
             # Test setting.
-            box.alignment = QtCore.Qt.AlignLeft
+            box.alignment = new_alignment
+            self.assertEqual(box.alignment, new_alignment)
+            self.assertEqual(box.qobj.alignment(), new_alignment)
 
 
 class TestQLineEdit(BaseTestWithGui, unittest.TestCase):

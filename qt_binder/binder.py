@@ -182,8 +182,22 @@ class QtProperty(QtTrait):
             d = object.__dict__.setdefault(DELAYED_SETATTR, {})
             d[name] = value
             return
-        old = self.get(object, name)
-        self.meta_prop.write(qobj, value)
+        try:
+            old = self.meta_prop.read(qobj)
+        except RuntimeError:
+            # PySide has a bug such that it will not return flags sometimes,
+            # like for QGroupBox.alignment.
+            name = self.meta_prop.name()
+            if hasattr(qobj, name):
+                old = getattr(qobj, name)()
+                setter = getattr(qobj, 'set' + name.title())
+                setter(value)
+            else:
+                # Nothing else we can do.
+                raise
+        else:
+            # Happy path.
+            self.meta_prop.write(qobj, value)
         if self.signal is None:
             # Propagate the event notification ourselves.
             object.trait_property_changed(name, old, value)
