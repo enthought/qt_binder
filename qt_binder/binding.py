@@ -236,14 +236,15 @@ class PulledFrom(Binding):
             context_name, xattr = rhs.split('.', 1)
             context_obj = context[context_name]
 
-            handler = _TraitModified(the_binder, binder_trait).handler
             # FIXME: Only check as far down as are HasTraits objects available.
             # We would like to be able to include references to methods on
             # attributes of HasTraits classes.
             # Unfortunately, a valid use case is where a leading object in
             # a true trait chain is None.
-            context_obj.on_trait_change(handler, xattr)
-            self.pull_handler_data = [(context_obj, handler, xattr)]
+            context_obj.sync_trait(xattr, the_binder, binder_trait,
+                                   mutual=False)
+            self.sync_data = [
+                (context_obj, xattr, the_binder, binder_trait)]
             # FIXME: do a better check for an event trait
             try:
                 xsetattr(the_binder, binder_trait,
@@ -256,23 +257,22 @@ class PulledFrom(Binding):
             raise ValueError(msg)
         else:
             # Expression.
-            self.pull_handler_data = []
-            handler = _EvaluateExpression(the_binder, binder_trait,
-                                          context, rhs).handler
+            self.sync_data = []
             for ext_trait in ext_traits:
                 context_name, xattr = ext_trait.split('.', 1)
                 if context_name not in context:
                     # Assume it's a builtin.
                     continue
                 context_obj = context[context_name]
-                context_obj.on_trait_change(handler, xattr)
-                self.pull_handler_data.append((context_obj, handler, xattr))
-            # Call the handler once to evaluate and set the value initially.
-            handler()
+                context_obj.sync_trait(xattr, the_binder, binder_trait,
+                                       mutual=False)
+                self.sync_data.append(
+                    (context_obj, xattr, the_binder, binder_trait))
 
     def unbind(self):
-        for context_obj, handler, xattr in self.pull_handler_data:
-            context_obj.on_trait_change(handler, xattr, remove=True)
+        for (the_binder, binder_trait, context_obj, xattr) in self.sync_data:
+            context_obj.sync_trait(xattr, the_binder, binder_trait,
+                                   mutual=False, remove=True)
 
     def __str__(self):
         return '{0.left} << {0.right}'.format(self)
@@ -298,13 +298,14 @@ class PushedTo(Binding):
         context_name, xattr = ext_trait.split('.', 1)
         context_obj = context[context_name]
 
-        handler = _TraitModified(context_obj, xattr).handler
-        the_binder.on_trait_change(handler, binder_trait)
-        self.pushed_handler_data = (the_binder, handler, binder_trait)
+        the_binder.sync_trait(binder_trait, context_obj, xattr,
+                              mutual=False)
+        self.sync_data = (the_binder, binder_trait, context_obj, xattr)
 
     def unbind(self):
-        the_binder, handler, binder_trait = self.pushed_handler_data
-        the_binder.on_trait_change(handler, binder_trait, remove=True)
+        the_binder, binder_trait, context_obj, xattr = self.sync_data
+        the_binder.sync_trait(binder_trait, context_obj, xattr,
+                              mutual=False, remove=True)
 
     def __str__(self):
         return '{0.left} >> {0.right}'.format(self)
@@ -324,12 +325,18 @@ class SyncedWith(PulledFrom, PushedTo):
     Mnemonic: ``binder_trait is synced with context_trait``
     """
     def bind(self, binder, context):
-        PulledFrom.bind(self, binder, context)
-        PushedTo.bind(self, binder, context)
+        ext_trait = self.right
+        the_binder, binder_trait = self._normalize_binder_trait(
+            binder, self.left, context)
+        context_name, xattr = ext_trait.split('.', 1)
+        context_obj = context[context_name]
+
+        the_binder.sync_trait(binder_trait, context_obj, xattr)
+        self.sync_data = (the_binder, binder_trait, context_obj, xattr)
 
     def unbind(self):
-        PushedTo.unbind(self)
-        PulledFrom.unbind(self)
+        the_binder, binder_trait, context_obj, xattr = self.sync_data
+        the_binder.sync_trait(binder_trait, context_obj, xattr, remove=True)
 
     def __str__(self):
         return '{0.left} := {0.right}'.format(self)
