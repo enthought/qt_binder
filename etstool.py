@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017, Enthought, Inc.
+#  Copyright (c) 2017-2019, Enthought, Inc.
 #  All rights reserved.
 #
 #  This software is provided without warranty under the terms of the BSD
@@ -54,8 +54,8 @@ using::
 
     python etstool.py test_all
 
-Currently supported runtime values are ``2.7`` and ``3.5``, and currently
-supported toolkits are ``null``, ``pyqt``, ``pyside`` and ``wx``.  Not all
+Currently supported runtime values are ``2.7``, ``3.5``, ``3.6``, and currently
+supported toolkits are ``null``, ``pyqt``, ``pyside``, and ``pyside2``.  Not all
 combinations of toolkits and runtimes will work, but the tasks will fail with
 a clear error if that is the case.
 
@@ -87,21 +87,22 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '2.7': {'pyside', 'pyside2', 'pyqt', 'wx', 'null'},
+    '2.7': {'pyside', 'pyside2', 'pyqt', 'null'},
     '3.5': {'pyside2', 'pyqt', 'pyqt5', 'null'},
     '3.6': {'pyside2', 'pyqt', 'pyqt5', 'null'},
 }
 
 dependencies = {
-    "numpy",
-    "pandas",
-    "pygments",
-    "traits",
-    "pip",
+    "six",
+    "flake8",
+    "mock",
     "nose",
     "coverage",
+    "pygments",
+    "numpy",
+    "pandas",
+    "traits",
 }
-
 extra_dependencies = {
     'pyside': {'pyside'},
     # XXX once pyside2 is available in EDM, we will want it here
@@ -137,8 +138,7 @@ def install(runtime, toolkit, environment):
 
     """
     parameters = get_parameters(runtime, toolkit, environment)
-    packages = ' '.join(
-        dependencies | extra_dependencies.get(toolkit, set()))
+    packages = ' '.join(dependencies | extra_dependencies.get(toolkit, set()))
     # edm commands to setup the development environment
     commands = [
         "edm environments create {environment} --force --version={runtime}",
@@ -172,13 +172,10 @@ def test(runtime, toolkit, environment):
     environ = environment_vars.get(toolkit, {}).copy()
     environ['PYTHONUNBUFFERED'] = "1"
     commands = [
-        "edm run -e {environment} -- coverage run -p -m nose.core -v traitsui.tests --nologcapture"]
-    # extra tests for qt
-    if toolkit in {'pyqt', 'pyside', 'pyqt5'}:
-        commands.append(
-            "edm run -e {environment} -- coverage run -p -m nose.core -v traitsui.qt4.tests --nologcapture")
+        "edm run -e {environment} -- coverage run -p -m nose.core -v qt_binder --nologcapture"
+    ]
 
-    # We run in a tempdir to avoid accidentally picking up wrong traitsui
+    # We run in a tempdir to avoid accidentally picking up wrong package
     # code from a local dir.  We need to ensure a good .coveragerc is in
     # that directory, plus coverage has a bug that means a non-local coverage
     # file doesn't get populated correctly.
@@ -266,7 +263,7 @@ def get_parameters(runtime, toolkit, environment):
                "test environments")
         raise RuntimeError(msg.format(**parameters))
     if environment is None:
-        parameters['environment'] = 'traitsui-test-{runtime}-{toolkit}'.format(**parameters)
+        parameters['environment'] = 'qtbinder-test-{runtime}-{toolkit}'.format(**parameters)
     return parameters
 
 
