@@ -269,7 +269,7 @@ class Bound(Item):
         # is unlikely to appear elsewhere in Traits UIs. Fortunately, it is one
         # that every `HasTraits` class already has, and it is an `Event`, which
         # prevents Traits UI from trying to get its value.
-        parsed_bindings = map(Binding.parse, bindings)
+        parsed_bindings = list(map(Binding.parse, bindings))
         super(Bound, self).__init__(
             value='trait_modified',
             editor=BoundEditor(
