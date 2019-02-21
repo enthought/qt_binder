@@ -108,14 +108,12 @@ extra_dependencies = {
     # XXX once pyside2 is available in EDM, we will want it here
     'pyside2': set(),
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
-    'wx': {'wxpython'},
 }
 
 environment_vars = {
     'pyside': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside'},
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
     'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
-    'wx': {'ETS_TOOLKIT': 'wx'},
 }
 
 
