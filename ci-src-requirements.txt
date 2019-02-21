@@ -1,0 +1,2 @@
+git+http://github.com/enthought/pyface.git#egg=pyface
+git+http://github.com/enthought/traitsui.git#egg=traitsui
