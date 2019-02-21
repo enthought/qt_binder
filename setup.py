@@ -24,7 +24,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
-    use_2to3=True,
+    use_2to3=False,
     install_requires=[
         'six',
         'traits',
