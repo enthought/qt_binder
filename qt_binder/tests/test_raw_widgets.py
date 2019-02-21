@@ -78,7 +78,11 @@ class TestGroupBox(BaseTestWithGui, unittest.TestCase):
             self.assertNotEqual(orig, new_alignment)
             # Test setting.
             box.alignment = new_alignment
-            self.assertEqual(box.alignment, new_alignment)
+            # Sometimes the flag comes back out as integers, which don't
+            # compare equal to the flag object.
+            self.assertEqual(int(box.alignment), int(new_alignment))
+            # But the alignment() getter method should always return the
+            # expected type.
             self.assertEqual(box.qobj.alignment(), new_alignment)
 
 
