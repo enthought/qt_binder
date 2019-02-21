@@ -105,10 +105,9 @@ class _EvaluateExpression(_TraitModified):
                 self._in_handler = False
 
 
-class Binding(object):
+class Binding(six.with_metaclass(ABCMeta, object)):
     """ Interface for a single binding pair.
     """
-    __metaclass__ = ABCMeta
 
     _op_regex = re.compile(r'\s*(=|>>|<<|:=)\s*')
 
