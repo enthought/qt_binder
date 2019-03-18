@@ -7,7 +7,7 @@ QtBinder provides a way to bind Qt widgets to Traits models.
 
 setup(
     name='qt_binder',
-    version='0.2',
+    version='0.2.1',
     author='Enthought, Inc.',
     author_email='info@enthought.com',
     description='Traits bindings for Qt',
@@ -24,5 +24,11 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
-    use_2to3=True,
+    use_2to3=False,
+    install_requires=[
+        'six',
+        'traits',
+        'pyface',
+        'traitsui',
+    ],
 )

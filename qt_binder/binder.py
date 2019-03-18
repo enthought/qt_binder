@@ -33,6 +33,19 @@ NULL_VARIANT_VALUES = {
 }
 
 
+def _to_str(t):
+    if isinstance(t, QtCore.QByteArray):
+        try:
+            # PyQt4
+            t = bytes(t).decode()
+        except TypeError:
+            # PySide
+            t = str(t)
+    else:
+        t = str(t)
+    return t
+
+
 def _slot_name(name):
     return '_{}_property_changed'.format(name)
 
@@ -169,8 +182,22 @@ class QtProperty(QtTrait):
             d = object.__dict__.setdefault(DELAYED_SETATTR, {})
             d[name] = value
             return
-        old = self.get(object, name)
-        self.meta_prop.write(qobj, value)
+        try:
+            old = self.meta_prop.read(qobj)
+        except RuntimeError:
+            # PySide has a bug such that it will not return flags sometimes,
+            # like for QGroupBox.alignment.
+            name = self.meta_prop.name()
+            if hasattr(qobj, name):
+                old = getattr(qobj, name)()
+                setter = getattr(qobj, 'set' + name.title())
+                setter(value)
+            else:
+                # Nothing else we can do.
+                raise
+        else:
+            # Happy path.
+            self.meta_prop.write(qobj, value)
         if self.signal is None:
             # Propagate the event notification ourselves.
             object.trait_property_changed(name, old, value)
@@ -553,7 +580,7 @@ class Binder(HasStrictTraits):
                 name = renamings.get(qname, qname)
                 if method_name_counts[name] > 1:
                     # Add the argument types to the name to disambiguate.
-                    arg_types = [str(t).rstrip('*')
+                    arg_types = [_to_str(t).rstrip('*')
                                  for t in meta_meth.parameterTypes()]
                     name = '_'.join([name] + arg_types)
                 if name not in seen:

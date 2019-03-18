@@ -1,14 +1,27 @@
-language: python
+language: generic
 sudo: false
-notifications:
-  email: false
-python:
-  - 2.7
-  - 2.7_with_system_site_packages
-  - 3.4
+
 env:
-  - QT_API=pyside
-  - QT_API=pyqt
+  global:
+    - INSTALL_EDM_VERSION=1.10.0
+      PYTHONUNBUFFERED="1"
+
+matrix:
+  include:
+    - env: RUNTIME=2.7 TOOLKITS="pyqt pyside"
+    - env: RUNTIME=3.5 TOOLKITS="pyqt"
+    - env: RUNTIME=3.6 TOOLKITS="pyqt"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKITS="pyside pyqt"
+    - os: osx
+      env: RUNTIME=3.5 TOOLKITS="pyqt"
+    - os: osx
+      env: RUNTIME=3.6 TOOLKITS="pyqt"
+  allow_failures:
+    - os: osx
+      env: RUNTIME=2.7 TOOLKITS="pyqt"
+  fast_finish: true
+
 branches:
   # We have both "Build pushes" and "Build PRs" turned on. Without the
   # following setting, Travis CI will do 2 builds for every update to a PR, one
@@ -19,42 +32,27 @@ branches:
   # regardless. If you want your WIP branches tested, open up a WIP PR.
   only:
     - master
-addons:
-  apt:
-    packages:
-    - python-qt4-dev
-    - python-qt4-gl
-    - ccache
-    - cmake
-matrix:
-  exclude:
-    - python: 2.7_with_system_site_packages
-      env: QT_API=pyside
-    - python: 2.7
-      env: QT_API=pyqt
-    - python: 3.4
-      env: QT_API=pyqt
+
 cache:
   directories:
     - $HOME/.cache
     - $HOME/.ccache
+
 before_install:
-  - ccache -s
-  - pip install --upgrade pip
-  - export PATH=/usr/lib/ccache:${PATH}
-  - if [[ ${QT_API} == 'pyside' ]]; then ./build_pyside_wheel.sh; fi
+  - mkdir -p "${HOME}/.cache/download"
   - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+  - if [[ ${TRAVIS_OS_NAME} == "linux" ]] ; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'linux' ]]; then ./install-edm-linux.sh; export PATH="${HOME}/edm/bin:${PATH}"; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'osx' ]]; then ./install-edm-osx.sh; export PATH="${PATH}:/usr/local/bin"; fi
+  - edm install -y wheel click coverage
+
 install:
-  - pip install -r dev_requirements.txt
-  - flake8
-  - python setup.py develop -N
-before_script:
-  - mkdir testrun
-  - cd testrun
-  - cp ../.coveragerc .
+  - for toolkit in ${TOOLKITS}; do edm run -- python etstool.py install --runtime=${RUNTIME} --toolkit=${toolkit} || exit; done
+
 script:
-  - coverage run -m nose.core -v qt_binder
+  - for toolkit in ${TOOLKITS}; do edm run -- python etstool.py test --runtime=${RUNTIME} --toolkit=${toolkit} || exit; done
+
 after_success:
-  - pip install codecov
-  - codecov
+  - edm run -- coverage combine
+  - edm run -- pip install codecov
+  - edm run -- codecov

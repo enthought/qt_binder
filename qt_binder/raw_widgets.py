@@ -693,7 +693,7 @@ _EXCLUDE_FROM_REGISTRY = [
 ]
 
 
-for obj in vars().values():
+for obj in list(vars().values()):
     if obj in _EXCLUDE_FROM_REGISTRY:
         continue
     if (isinstance(obj, type) and
