@@ -99,21 +99,22 @@ dependencies = {
     "nose",
     "coverage",
     "pygments",
-    "numpy",
-    "pandas",
     "traits",
 }
+
 extra_dependencies = {
     'pyside': {'pyside'},
     # XXX once pyside2 is available in EDM, we will want it here
     'pyside2': set(),
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
+    'pyqt5': {'pyqt5'},
 }
 
 environment_vars = {
     'pyside': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside'},
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
     'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
+    'pyqt5': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt5'},
 }
 
 
