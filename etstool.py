@@ -96,7 +96,6 @@ dependencies = {
     "six",
     "flake8",
     "mock",
-    "nose",
     "coverage",
     "pygments",
     "traits",
@@ -164,7 +163,7 @@ def test(runtime, toolkit, environment):
     environ = environment_vars.get(toolkit, {}).copy()
     environ['PYTHONUNBUFFERED'] = "1"
     commands = [
-        "edm run -e {environment} -- coverage run -p -m nose.core -v qt_binder --nologcapture"
+        "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
     ]
 
     # We run in a tempdir to avoid accidentally picking up wrong package
