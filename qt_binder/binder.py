@@ -25,7 +25,7 @@ from .constants import DELAYED_CONNECTION, DELAYED_SETATTR, \
     EXISTING_INSTANCE_TRAIT, EXISTING_NOTIFIERS, FORCE_INSTANCE_TRAIT, \
     FORCE_NOTIFIERS
 from .loopback_guard import LoopbackGuard
-from .qt import QtCore
+from .qt import QtCore, qt_api
 
 
 NULL_VARIANT_VALUES = {
@@ -189,17 +189,7 @@ class QtProperty(QtTrait):
                 msg = ("Property {0!r} not available until Binder is given "
                        "its QObject.".format(name))
                 raise AttributeError(msg)
-        try:
-            value = self.meta_prop.read(qobj)
-        except RuntimeError:
-            # PySide has a bug such that it will not return flags sometimes,
-            # like for QGroupBox.alignment.
-            name = self.meta_prop.name()
-            if hasattr(qobj, name):
-                value = getattr(qobj, name)()
-            else:
-                # Nothing else we can do.
-                raise
+        value = self.meta_prop.read(qobj)
         # PyQt4 will sometimes return a QPyNullVariant via this API even if it
         # converts it to the correct null value for the type for the property
         # attribute on the QObject itself.
@@ -218,21 +208,19 @@ class QtProperty(QtTrait):
             d = object.__dict__.setdefault(DELAYED_SETATTR, {})
             d[name] = value
             return
-        try:
-            old = self.meta_prop.read(qobj)
-        except RuntimeError:
-            # PySide has a bug such that it will not return flags sometimes,
-            # like for QGroupBox.alignment.
-            name = self.meta_prop.name()
-            if hasattr(qobj, name):
-                old = getattr(qobj, name)()
-                setter = getattr(qobj, 'set' + name.title())
-                setter(value)
-            else:
-                # Nothing else we can do.
-                raise
+        old = self.meta_prop.read(qobj)
+        if qt_api.startswith('pyside'):
+            # PySide2 has a bug such that it will not set flags properly through
+            # the QMetaProperty mechanism, like for QGroupBox.alignment.
+            # Use names instead.
+            qname = _python_name_for_qt_name(_to_str(self.meta_prop.name()))
+            # The setter is pretty reliably named like this. The getter is
+            # sometimes not (e.g. isEditable() instead of editable()), so we
+            # continue to use the QMetaProperty.read() mechanism for that,
+            # which seems reliable in PySide2.
+            setter = getattr(qobj, _setter_name(qname))
+            setter(value)
         else:
-            # Happy path.
             self.meta_prop.write(qobj, value)
         if not self.is_signal:
             # Propagate the event notification ourselves.
