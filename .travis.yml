@@ -1,5 +1,8 @@
 language: generic
+dist: xenial
 sudo: false
+services:
+  - xvfb
 
 env:
   global:
@@ -8,9 +11,9 @@ env:
 
 matrix:
   include:
-    - env: RUNTIME=3.6 TOOLKITS="pyqt"
+    - env: RUNTIME=3.6 TOOLKITS="pyqt pyqt5"
     - os: osx
-      env: RUNTIME=3.6 TOOLKITS="pyqt"
+      env: RUNTIME=3.6 TOOLKITS="pyqt pyqt5"
   fast_finish: true
 
 branches:
@@ -31,8 +34,6 @@ cache:
 
 before_install:
   - mkdir -p "${HOME}/.cache/download"
-  - export DISPLAY=:99.0
-  - if [[ ${TRAVIS_OS_NAME} == "linux" ]] ; then sh -e /etc/init.d/xvfb start; fi
   - if [[ ${TRAVIS_OS_NAME} == 'linux' ]]; then ./install-edm-linux.sh; export PATH="${HOME}/edm/bin:${PATH}"; fi
   - if [[ ${TRAVIS_OS_NAME} == 'osx' ]]; then ./install-edm-osx.sh; export PATH="${PATH}:/usr/local/bin"; fi
   - edm install -y wheel click coverage
