@@ -54,8 +54,8 @@ using::
 
     python etstool.py test_all
 
-Currently supported runtime values are ``2.7``, ``3.5``, ``3.6``, and currently
-supported toolkits are ``pyqt``, ``pyside``, and ``pyside2``.  Not all
+The currently supported runtime value is ``3.6``, and currently supported
+toolkits are ``pyqt``, ``pyqt5``, and ``pyside2``.  Not all
 combinations of toolkits and runtimes will work, but the tasks will fail with
 a clear error if that is the case.
 
@@ -87,9 +87,7 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '2.7': {'pyside', 'pyside2', 'pyqt'},
-    '3.5': {'pyside2', 'pyqt'},
-    '3.6': {'pyside2', 'pyqt'},
+    '3.6': {'pyside2', 'pyqt', 'pyqt5'},
 }
 
 dependencies = {
@@ -102,7 +100,6 @@ dependencies = {
 }
 
 extra_dependencies = {
-    'pyside': {'pyside'},
     # XXX once pyside2 is available in EDM, we will want it here
     'pyside2': set(),
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
@@ -110,7 +107,6 @@ extra_dependencies = {
 }
 
 environment_vars = {
-    'pyside': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside'},
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
     'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
     'pyqt5': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt5'},
