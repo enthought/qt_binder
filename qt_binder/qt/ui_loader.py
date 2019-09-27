@@ -25,7 +25,10 @@ if qt_api.startswith('pyqt'):
 else:
     def load_ui(path):
         from collections import Counter
-        from PySide.QtUiTools import QUiLoader
+        if qt_api == 'pyside':
+            from PySide.QtUiTools import QUiLoader
+        elif qt_api == 'pyside2':
+            from PySide2.QtUiTools import QUiLoader
 
         class RecordingUiLoader(QUiLoader):
             """ Record the names of widgets as they are created.
