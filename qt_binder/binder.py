@@ -97,6 +97,12 @@ def _qt_name_for_meta_method(meta_meth):
     return _get_signature(meta_meth).split('(')[0]
 
 
+def _setter_name(getter_name):
+    """ Convert a getter name to a setter name.
+    """
+    return 'set' + getter_name[0].upper() + getter_name[1:]
+
+
 class QtTrait(TraitType):
     """ Base class for Qt proxy traits on :class:`~.Binder` classes.
 
@@ -299,7 +305,7 @@ class QtGetterSetter(QtTrait):
         super(QtGetterSetter, self).__init__(**metadata)
         self.getter_name = getter_name
         if setter_name is None:
-            setter_name = 'set' + getter_name.title()
+            setter_name = _setter_name(getter_name)
         self.setter_name = setter_name
 
     def get(self, object, name):
@@ -639,7 +645,6 @@ class Binder(HasStrictTraits):
                 if (callable(class_attr) or
                         type(class_attr).__name__ == 'methoddescriptor'):
                     methods.add(name)
-            methods.difference_update(seen)
             for qname in methods:
                 # FIXME: We do not know if these are true getter/setters, where
                 # the getter has 0 arguments and the setter has just the 1. For
@@ -647,11 +652,17 @@ class Binder(HasStrictTraits):
                 # `QObject.setProperty(name, value)` get misidentified here.
                 # Unfortunately, the method objects do not have any information
                 # about their argument structure.
-                putative_setter = 'set' + qname.title()
+                if qname == 'property':
+                    continue
+                putative_setter = _setter_name(qname)
                 if putative_setter in methods:
                     name = renamings.get(qname, qname)
                     if name.endswith('_'):
                         # See #21
+                        continue
+                    if name in seen:
+                        # We've done this pair earlier, probably through the
+                        # QMetaProperty mechanism, so we can ignore it here.
                         continue
                     binder_class.add_class_trait(
                         name, QtGetterSetter(qname, putative_setter))
