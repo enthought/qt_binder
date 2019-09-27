@@ -100,10 +100,6 @@ class WizardPage(Binder):
     qclass = QtGui.QWizardPage
 
 
-class Workspace(Binder):
-    qclass = QtGui.QWorkspace
-
-
 class Frame(Binder):
     qclass = QtGui.QFrame
 
