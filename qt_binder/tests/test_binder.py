@@ -171,11 +171,8 @@ class TestBinder(unittest.TestCase):
             received.append(new)
 
         obj.on_trait_change(handler, 'destroyed')
-        obj.on_trait_change(handler, 'destroyed_QObject')
         with self.assertRaises(AttributeError):
             obj.destroyed
-        with self.assertRaises(AttributeError):
-            obj.destroyed_QObject
 
         obj.construct()
         qobj = obj.qobj
@@ -193,19 +190,22 @@ class TestBinder(unittest.TestCase):
         # Check delayed signal.
         qobj.destroyed[QtCore.QObject].emit(qobj)
 
-        six.assertCountEqual(self, received, [(), qobj])
+        # When there are 2 overloads for a signal and one of the is
+        # argumentless, we actually get the single-argument version regardless.
+        # This is actually typically what we want, but I'm noting it because
+        # this behavior did change when we redid the signal implementation to
+        # conform to the limitations of the PyQt5 signal implementation.
+        six.assertCountEqual(self, received, [qobj])
 
         # No signal after removal.
         received[:] = []
         obj.on_trait_change(handler, 'destroyed', remove=True)
-        obj.on_trait_change(handler, 'destroyed_QObject', remove=True)
 
         qobj.destroyed[QtCore.QObject].emit(qobj)
         self.assertEqual(received, [])
 
         # No signal after disposal.
         obj.on_trait_change(handler, 'destroyed')
-        obj.on_trait_change(handler, 'destroyed_QObject')
         obj.dispose()
         qobj.destroyed[QtCore.QObject].emit(qobj)
         self.assertEqual(received, [])
