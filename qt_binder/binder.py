@@ -156,7 +156,7 @@ class QtTrait(TraitType):
         assert self.is_signal
         # The subclass must provide these when is_signal is True
         assert hasattr(self, 'qname') and hasattr(self, 'meta_method')
-        arg_types = self.meta_method.parameterTypes()
+        arg_types = [_to_str(arg) for arg in self.meta_method.parameterTypes()]
         signal = getattr(qobj, _python_name_for_qt_name(self.qname))
         if len(arg_types) == 0:
             return signal
