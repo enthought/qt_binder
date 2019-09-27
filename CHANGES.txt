@@ -6,6 +6,10 @@ Release 0.2.1
 
 Fixes
 
+* Fix the setting of alignment and similar flag properties (#51)
+* Travis CI setup via ETStool (#53)
+* Fixes for Python 3 compatibility (#48, #54)
+* Fix ignorable Flake8 errors (#49)
 * Add ``install_requires`` (#46)
 
 
