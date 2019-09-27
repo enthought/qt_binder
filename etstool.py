@@ -151,16 +151,23 @@ def install(runtime, toolkit, environment):
 @click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
-def test(runtime, toolkit, environment):
+@click.argument('test_spec', nargs=-1)
+def test(runtime, toolkit, environment, test_spec):
     """ Run the test suite in a given environment with the specified toolkit.
 
     """
     parameters = get_parameters(runtime, toolkit, environment)
     environ = environment_vars.get(toolkit, {}).copy()
     environ['PYTHONUNBUFFERED'] = "1"
-    commands = [
-        "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
-    ]
+    if len(test_spec) == 0:
+        commands = [
+            "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
+        ]
+    else:
+        commands = [
+            ("edm run -e {environment} -- coverage run -p -m unittest -v " +
+             " ".join(test_spec))
+        ]
 
     # We run in a tempdir to avoid accidentally picking up wrong package
     # code from a local dir.  We need to ensure a good .coveragerc is in
