@@ -33,14 +33,9 @@ NULL_VARIANT_VALUES = {
 }
 
 
-def _to_str(t):
+def _to_str(t, encoding='ascii'):
     if isinstance(t, QtCore.QByteArray):
-        try:
-            # PyQt4
-            t = bytes(t).decode()
-        except TypeError:
-            # PySide
-            t = str(t)
+        t = t.data().decode(encoding)
     else:
         t = str(t)
     return t
