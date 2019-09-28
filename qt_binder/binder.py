@@ -557,6 +557,101 @@ class Binder(HasStrictTraits):
                 for func, name in connectors:
                     func(self, name)
 
+    def _collect_renamings(self, binder_class):
+        """ Collect all of the renamings requested by Rename traits.
+        """
+        renamings = {}
+        # Find all requested renamings.
+        for name in dir(binder_class):
+            obj = getattr(binder_class, name)
+            if isinstance(obj, Rename):
+                renamings[obj.qt_name] = name
+        return renamings
+
+    def _add_qt_properties(self, binder_class, renamings, seen):
+        """ Add QtProperties.
+        """
+        meta_object = binder_class.qclass.staticMetaObject
+        for i in range(meta_object.propertyCount()):
+            meta_prop = meta_object.property(i)
+            qname = _python_name_for_qt_name(meta_prop.name())
+            name = renamings.get(qname, qname)
+            if name not in seen:
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                binder_class.add_class_trait(name, QtProperty(meta_prop))
+                seen.add(name)
+
+    def _add_qt_signals_slots(self, binder_class, renamings, seen):
+        """ Add QtSignals and QtSlots.
+        """
+        meta_object = binder_class.qclass.staticMetaObject
+        method_names = []
+        method_name_counts = Counter()
+        for i in range(meta_object.methodCount()):
+            meta_meth = meta_object.method(i)
+            qname = _python_name_for_qt_name(
+                _qt_name_for_meta_method(meta_meth))
+            name = renamings.get(qname, qname)
+            method_names.append(name)
+            method_name_counts[name] += 1
+        for i in range(meta_object.methodCount()):
+            meta_meth = meta_object.method(i)
+            qname = _python_name_for_qt_name(
+                _qt_name_for_meta_method(meta_meth))
+            name = renamings.get(qname, qname)
+            if method_name_counts[name] > 1:
+                # Add the argument types to the name to disambiguate.
+                arg_types = [_to_str(t).rstrip('*')
+                             for t in meta_meth.parameterTypes()]
+                name = '_'.join([name] + arg_types)
+            if name not in seen:
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                method_type = meta_meth.methodType()
+                if method_type == meta_meth.Signal:
+                    trait = QtSignal(meta_meth)
+                elif method_type == meta_meth.Slot:
+                    trait = QtSlot(meta_meth)
+                else:
+                    continue
+                binder_class.add_class_trait(name, trait)
+                seen.add(name)
+
+    def _add_implied_properties(self, binder_class, renamings, seen):
+        """ Add properties defined by pairs of getters and setters.
+        """
+        # Add all getter/setter pairs that we can identify.
+        methods = set()
+        for name, class_attr in vars(binder_class.qclass).items():
+            # sip methoddescriptor objects do not have __call__() defined.
+            if (callable(class_attr) or
+                    type(class_attr).__name__ == 'methoddescriptor'):
+                methods.add(name)
+        for qname in methods:
+            # FIXME: We do not know if these are true getter/setters, where
+            # the getter has 0 arguments and the setter has just the 1. For
+            # example, `QObject.property(name)` and
+            # `QObject.setProperty(name, value)` get misidentified here.
+            # Unfortunately, the method objects do not have any information
+            # about their argument structure.
+            if qname == 'property':
+                continue
+            putative_setter = _setter_name(qname)
+            if putative_setter in methods:
+                name = renamings.get(qname, qname)
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                if name in seen:
+                    # We've done this pair earlier, probably through the
+                    # QMetaProperty mechanism, so we can ignore it here.
+                    continue
+                binder_class.add_class_trait(
+                    name, QtGetterSetter(qname, putative_setter))
+
     def _initialize_binder_class(self):
         """ Ensure that the binder class has been initialized.
         """
@@ -567,88 +662,11 @@ class Binder(HasStrictTraits):
         # still only want to look directly at this class, not its superclasses.
         initialized = binder_class.__dict__.get(initialized_name, False)
         if not initialized:
-            renamings = {}
-            # Find all requested renamings.
-            for name in dir(binder_class):
-                obj = getattr(binder_class, name)
-                if isinstance(obj, Rename):
-                    renamings[obj.qt_name] = name
-            qt_class = binder_class.qclass
-            meta_object = qt_class.staticMetaObject
+            renamings = self._collect_renamings(binder_class)
             seen = set(binder_class.class_trait_names())
-            for i in range(meta_object.propertyCount()):
-                meta_prop = meta_object.property(i)
-                qname = _python_name_for_qt_name(meta_prop.name())
-                name = renamings.get(qname, qname)
-                if name not in seen:
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    binder_class.add_class_trait(name, QtProperty(meta_prop))
-                    seen.add(name)
-
-            # Ignore any from the superclass or explicitly defined.
-            method_names = []
-            method_name_counts = Counter()
-            for i in range(meta_object.methodCount()):
-                meta_meth = meta_object.method(i)
-                qname = _python_name_for_qt_name(
-                    _qt_name_for_meta_method(meta_meth))
-                name = renamings.get(qname, qname)
-                method_names.append(name)
-                method_name_counts[name] += 1
-            for i in range(meta_object.methodCount()):
-                meta_meth = meta_object.method(i)
-                qname = _python_name_for_qt_name(
-                    _qt_name_for_meta_method(meta_meth))
-                name = renamings.get(qname, qname)
-                if method_name_counts[name] > 1:
-                    # Add the argument types to the name to disambiguate.
-                    arg_types = [_to_str(t).rstrip('*')
-                                 for t in meta_meth.parameterTypes()]
-                    name = '_'.join([name] + arg_types)
-                if name not in seen:
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    method_type = meta_meth.methodType()
-                    if method_type == meta_meth.Signal:
-                        trait = QtSignal(meta_meth)
-                    elif method_type == meta_meth.Slot:
-                        trait = QtSlot(meta_meth)
-                    else:
-                        continue
-                    binder_class.add_class_trait(name, trait)
-                    seen.add(name)
-
-            # Add all getter/setter pairs that we can identify.
-            methods = set()
-            for name, class_attr in vars(qt_class).items():
-                # sip methoddescriptor objects do not have __call__() defined.
-                if (callable(class_attr) or
-                        type(class_attr).__name__ == 'methoddescriptor'):
-                    methods.add(name)
-            for qname in methods:
-                # FIXME: We do not know if these are true getter/setters, where
-                # the getter has 0 arguments and the setter has just the 1. For
-                # example, `QObject.property(name)` and
-                # `QObject.setProperty(name, value)` get misidentified here.
-                # Unfortunately, the method objects do not have any information
-                # about their argument structure.
-                if qname == 'property':
-                    continue
-                putative_setter = _setter_name(qname)
-                if putative_setter in methods:
-                    name = renamings.get(qname, qname)
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    if name in seen:
-                        # We've done this pair earlier, probably through the
-                        # QMetaProperty mechanism, so we can ignore it here.
-                        continue
-                    binder_class.add_class_trait(
-                        name, QtGetterSetter(qname, putative_setter))
+            self._add_qt_properties(binder_class, renamings, seen)
+            self._add_qt_signals_slots(binder_class, renamings, seen)
+            self._add_implied_properties(binder_class, renamings, seen)
             setattr(binder_class, initialized_name, True)
 
     def _qobj_changed(self, old, new):
