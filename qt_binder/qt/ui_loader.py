@@ -1,9 +1,12 @@
-from . import qt_api
+from . import is_qt4, qt_api
 
-if qt_api == 'pyqt':
+if qt_api.startswith('pyqt'):
     def load_ui(path):
         from collections import Counter
-        from PyQt4 import uic
+        if is_qt4:
+            from PyQt4 import uic
+        else:
+            from PyQt5 import uic
 
         ui = uic.loadUi(path)
         names_hist = Counter()

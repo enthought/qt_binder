@@ -9,7 +9,7 @@
 *.o
 *.a
 
-.coverage
+.coverage*
 htmlcov/
 
 *.egg-info/

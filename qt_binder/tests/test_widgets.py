@@ -18,7 +18,7 @@ from traits.testing.unittest_tools import UnittestTools
 
 from ..qt import QtGui
 from ..testing import BaseTestWithGui
-from ..widgets import FloatSlider, RangeSlider, TextField
+from ..widgets import FloatSlider, RangeSlider, TextField, EditableComboBox
 
 
 class TestTextField(unittest.TestCase, BaseTestWithGui, UnittestTools):
@@ -95,3 +95,30 @@ class TestRangeSlider(unittest.TestCase, BaseTestWithGui):
             field.editingFinished = True
             self.assertEqual(slider.value, 50)
             self.assertEqual(range_slider.value, 50)
+
+
+class TestEditableComboBox(unittest.TestCase, BaseTestWithGui):
+
+    def test_overloaded_signals(self):
+        with self.constructed(EditableComboBox()) as combo:
+            combo.values = [(0, 'zero'), (1, 'one'), (2, 'two')]
+            combo.setCurrentIndex(1)
+            self.assertEqual(combo.value, 1)
+
+            received = []
+
+            def slot(value):
+                received.append(value)
+
+            combo.on_trait_change(slot, 'currentIndexChanged_int')
+            combo.setCurrentIndex(2)
+            self.assertEqual(received, [2])
+            received[:] = []
+            combo.on_trait_change(slot, 'currentIndexChanged_int', remove=True)
+
+            combo.on_trait_change(slot, 'currentIndexChanged_QString')
+            combo.setCurrentIndex(0)
+            self.assertEqual(received, ['zero'])
+            received[:] = []
+            combo.on_trait_change(slot, 'currentIndexChanged_QString',
+                                  remove=True)

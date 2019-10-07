@@ -1,7 +1,6 @@
 six
 flake8
 mock
-nose
 coverage
 traits
 git+http://github.com/enthought/pyface.git#egg=pyface

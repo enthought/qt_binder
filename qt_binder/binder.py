@@ -80,6 +80,23 @@ def _python_name_for_qt_name(qname):
     return qname
 
 
+def _get_signature(meta_meth):
+    """ Robustly find the signature of a ``QMetaMethod``.
+    """
+    if hasattr(meta_meth, 'methodSignature'):
+        signature = meta_meth.methodSignature()
+    else:
+        signature = meta_meth.signature()
+    signature = _to_str(signature)
+    return signature
+
+
+def _qt_name_for_meta_method(meta_meth):
+    """ Get the Qt name for a ``QMetaMethod``.
+    """
+    return _get_signature(meta_meth).split('(')[0]
+
+
 class QtTrait(TraitType):
     """ Base class for Qt proxy traits on :class:`~.Binder` classes.
 
@@ -87,12 +104,14 @@ class QtTrait(TraitType):
     :class:`~.QtTrait` subclasses are property-like traits.
 
     If there is a Qt ``Signal`` that should be connected to to propagate
-    notifications, assign it to the ``signal`` attribute. The Qt ``Signal``
-    will only be connected to when a Traits listener is attached to this trait.
+    notifications, set ``is_signal`` to ``True`` and provide a ``qname`` (the
+    Qt name for the signal) and ``meta_method`` (the ``QMetaMethod`` for the
+    signal). The Qt ``Signal`` will only be connected to when a Traits listener
+    is attached to this trait.
     """
 
     def __init__(self, *args, **metadata):
-        self.signal = None
+        self.is_signal = False
         super(QtTrait, self).__init__(transient=True, **metadata)
 
     def get(self, object, name):
@@ -108,26 +127,40 @@ class QtTrait(TraitType):
     def connect_signal(self, object, name):
         """ Connect to the Qt signal, if any.
         """
-        if self.signal is None:
+        if not self.is_signal:
             # No signal to connect to.
             return
-        qobj = object.qobj
         slot = _slot_for(weakref.ref(object), name)
         object.__dict__[slot.__name__] = slot
-        # Use the classmethod form for PyQt4 compatibility.
-        QtCore.QObject.connect(qobj, self.signal, slot)
+        # Get the bound signal from the QObject.
+        signal = self._get_signal(object.qobj)
+        signal.connect(slot)
 
     def disconnect_signal(self, object, name):
         """ Disconnect from the Qt signal, if any.
         """
-        if self.signal is None:
+        if not self.is_signal:
             # No signal to disconnect from.
             return
         slot_name = _slot_name(name)
         slot = object.__dict__.pop(slot_name, None)
         if slot is not None:
-            # Use the classmethod form for PyQt4 compatibility.
-            QtCore.QObject.disconnect(object.qobj, self.signal, slot)
+            signal = self._get_signal(object.qobj)
+            signal.disconnect(slot)
+
+    def _get_signal(self, qobj):
+        """ Return the correct bound signal, especially when overloaded.
+        """
+        # Only call this when we are a signal.
+        assert self.is_signal
+        # The subclass must provide these when is_signal is True
+        assert hasattr(self, 'qname') and hasattr(self, 'meta_method')
+        arg_types = self.meta_method.parameterTypes()
+        signal = getattr(qobj, _python_name_for_qt_name(self.qname))
+        if len(arg_types) == 0:
+            return signal
+        else:
+            return signal[tuple(arg_types)]
 
 
 class QtProperty(QtTrait):
@@ -139,7 +172,9 @@ class QtProperty(QtTrait):
         super(QtProperty, self).__init__(**metadata)
         self.meta_prop = meta_prop
         if meta_prop.hasNotifySignal():
-            self.signal = QtCore.SIGNAL(meta_prop.notifySignal().signature())
+            self.meta_method = self.meta_prop.notifySignal()
+            self.qname = _qt_name_for_meta_method(self.meta_method)
+            self.is_signal = True
 
     def get(self, object, name):
         """ Get the value of this trait.
@@ -198,7 +233,7 @@ class QtProperty(QtTrait):
         else:
             # Happy path.
             self.meta_prop.write(qobj, value)
-        if self.signal is None:
+        if not self.is_signal:
             # Propagate the event notification ourselves.
             object.trait_property_changed(name, old, value)
 
@@ -311,7 +346,7 @@ class QtSlot(QtTrait):
     def __init__(self, meta_method, **metadata):
         super(QtSlot, self).__init__(**metadata)
         self.meta_method = meta_method
-        self.qname = meta_method.signature().split('(')[0]
+        self.qname = _qt_name_for_meta_method(meta_method)
         self.n_args = len(meta_method.parameterTypes())
 
     def get(self, object, name):
@@ -357,7 +392,7 @@ class QtSignal(QtSlot):
     """
     def __init__(self, meta_method, **metadata):
         super(QtSignal, self).__init__(meta_method, **metadata)
-        self.signal = QtCore.SIGNAL(meta_method.signature())
+        self.is_signal = True
 
     def set(self, object, name, value):
         """ Emit the signal with the given value.
@@ -569,14 +604,14 @@ class Binder(HasStrictTraits):
             for i in range(meta_object.methodCount()):
                 meta_meth = meta_object.method(i)
                 qname = _python_name_for_qt_name(
-                    meta_meth.signature().split('(')[0])
+                    _qt_name_for_meta_method(meta_meth))
                 name = renamings.get(qname, qname)
                 method_names.append(name)
                 method_name_counts[name] += 1
             for i in range(meta_object.methodCount()):
                 meta_meth = meta_object.method(i)
                 qname = _python_name_for_qt_name(
-                    meta_meth.signature().split('(')[0])
+                    _qt_name_for_meta_method(meta_meth))
                 name = renamings.get(qname, qname)
                 if method_name_counts[name] > 1:
                     # Add the argument types to the name to disambiguate.

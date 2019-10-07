@@ -21,7 +21,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
     use_2to3=False,

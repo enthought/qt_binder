@@ -54,8 +54,8 @@ using::
 
     python etstool.py test_all
 
-Currently supported runtime values are ``2.7``, ``3.5``, ``3.6``, and currently
-supported toolkits are ``pyqt``, ``pyside``, and ``pyside2``.  Not all
+The currently supported runtime value is ``3.6``, and currently supported
+toolkits are ``pyqt``, ``pyqt5``, and ``pyside2``.  Not all
 combinations of toolkits and runtimes will work, but the tasks will fail with
 a clear error if that is the case.
 
@@ -87,33 +87,29 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '2.7': {'pyside', 'pyside2', 'pyqt'},
-    '3.5': {'pyside2', 'pyqt'},
-    '3.6': {'pyside2', 'pyqt'},
+    '3.6': {'pyside2', 'pyqt', 'pyqt5'},
 }
 
 dependencies = {
     "six",
     "flake8",
     "mock",
-    "nose",
     "coverage",
     "pygments",
-    "numpy",
-    "pandas",
     "traits",
 }
+
 extra_dependencies = {
-    'pyside': {'pyside'},
     # XXX once pyside2 is available in EDM, we will want it here
     'pyside2': set(),
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
+    'pyqt5': {'pyqt5'},
 }
 
 environment_vars = {
-    'pyside': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside'},
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
     'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
+    'pyqt5': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt5'},
 }
 
 
@@ -123,7 +119,7 @@ def cli():
 
 
 @cli.command()
-@click.option('--runtime', default='3.5')
+@click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
 def install(runtime, toolkit, environment):
@@ -152,7 +148,7 @@ def install(runtime, toolkit, environment):
 
 
 @cli.command()
-@click.option('--runtime', default='3.5')
+@click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
 def test(runtime, toolkit, environment):
@@ -163,7 +159,7 @@ def test(runtime, toolkit, environment):
     environ = environment_vars.get(toolkit, {}).copy()
     environ['PYTHONUNBUFFERED'] = "1"
     commands = [
-        "edm run -e {environment} -- coverage run -p -m nose.core -v qt_binder --nologcapture"
+        "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
     ]
 
     # We run in a tempdir to avoid accidentally picking up wrong package
@@ -177,7 +173,7 @@ def test(runtime, toolkit, environment):
     click.echo('Done test')
 
 @cli.command()
-@click.option('--runtime', default='3.5')
+@click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
 def cleanup(runtime, toolkit, environment):
@@ -194,7 +190,7 @@ def cleanup(runtime, toolkit, environment):
 
 
 @cli.command()
-@click.option('--runtime', default='3.5')
+@click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 def test_clean(runtime, toolkit):
     """ Run tests in a clean environment, cleaning up afterwards
@@ -208,7 +204,7 @@ def test_clean(runtime, toolkit):
         cleanup(args=args, standalone_mode=False)
 
 @cli.command()
-@click.option('--runtime', default='3.5')
+@click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
 def update(runtime, toolkit, environment):
