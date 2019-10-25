@@ -12,7 +12,7 @@
 #
 #------------------------------------------------------------------------------
 
-from collections import Counter, deque
+from collections import defaultdict, deque
 import keyword
 import weakref
 
@@ -594,38 +594,37 @@ class Binder(HasStrictTraits):
         """ Add QtSignals and QtSlots.
         """
         meta_object = binder_class.qclass.staticMetaObject
-        method_names = []
-        method_name_counts = Counter()
+        overloads = defaultdict(list)
         for i in range(meta_object.methodCount()):
             meta_meth = meta_object.method(i)
             qname = _python_name_for_qt_name(
                 _qt_name_for_meta_method(meta_meth))
             name = renamings.get(qname, qname)
-            method_names.append(name)
-            method_name_counts[name] += 1
-        for i in range(meta_object.methodCount()):
-            meta_meth = meta_object.method(i)
-            qname = _python_name_for_qt_name(
-                _qt_name_for_meta_method(meta_meth))
-            name = renamings.get(qname, qname)
-            if method_name_counts[name] > 1:
-                # Add the argument types to the name to disambiguate.
-                arg_types = [_to_str(t).rstrip('*')
-                             for t in meta_meth.parameterTypes()]
-                name = '_'.join([name] + arg_types)
-            if name not in seen:
-                if name.endswith('_'):
-                    # See #21
-                    continue
-                method_type = meta_meth.methodType()
-                if method_type == meta_meth.Signal:
-                    trait = QtSignal(meta_meth)
-                elif method_type == meta_meth.Slot:
-                    trait = QtSlot(meta_meth)
+            overloads[name].append(meta_meth)
+
+        for name, methods in overloads.items():
+            method_type = methods[0].methodType()
+            if method_type == QtCore.QMetaMethod.Slot:
+                trait_type = QtSlot
+            elif method_type == QtCore.QMetaMethod.Signal:
+                trait_type = QtSignal
+            else:
+                continue
+            for meta_meth in methods:
+                if len(methods) > 1:
+                    # Add the argument types to the name to disambiguate.
+                    arg_types = [_to_str(t).rstrip('*')
+                                 for t in meta_meth.parameterTypes()]
+                    qualname = '_'.join([name] + arg_types)
                 else:
-                    continue
-                binder_class.add_class_trait(name, trait)
-                seen.add(name)
+                    qualname = name
+                if qualname not in seen:
+                    if qualname.endswith('_'):
+                        # See #21
+                        continue
+                    trait = trait_type(meta_meth)
+                    binder_class.add_class_trait(qualname, trait)
+                    seen.add(qualname)
 
     def _add_implied_properties(self, binder_class, renamings, seen):
         """ Add properties defined by pairs of getters and setters.
