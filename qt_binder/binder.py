@@ -216,9 +216,9 @@ class QtProperty(QtTrait):
             return
         old = self.meta_prop.read(qobj)
         if qt_api.startswith('pyside'):
-            # PySide2 has a bug such that it will not set flags properly through
-            # the QMetaProperty mechanism, like for QGroupBox.alignment.
-            # Use names instead.
+            # PySide2 has a bug such that it will not set flags properly
+            # through the QMetaProperty mechanism, like for
+            # QGroupBox.alignment.  Use names instead.
             qname = _python_name_for_qt_name(_to_str(self.meta_prop.name()))
             # The setter is pretty reliably named like this. The getter is
             # sometimes not (e.g. isEditable() instead of editable()), so we
@@ -406,7 +406,8 @@ class QtSignal(QtSlot):
         else:
             # In both PyQt4 and PySide, QMetaMethod.invoke() does not
             # automatically convert the arguments, so emit it directly.
-            getattr(qobj, name).emit(*args)
+            signal = self._get_signal(qobj)
+            signal.emit(*args)
 
 
 class Rename(object):
