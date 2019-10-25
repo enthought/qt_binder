@@ -147,7 +147,13 @@ class QtTrait(TraitType):
         slot = object.__dict__.pop(slot_name, None)
         if slot is not None:
             signal = self._get_signal(object.qobj)
-            signal.disconnect(slot)
+            # FIXME: PySide2 will raise a RuntimeError here, but it will
+            # disconnect the signal. Not sure if there are other problems.
+            try:
+                signal.disconnect(slot)
+            except RuntimeError:
+                if qt_api != 'pyside2':
+                    raise
 
     def _get_signal(self, qobj):
         """ Return the correct bound signal, especially when overloaded.
