@@ -139,7 +139,7 @@ def install(runtime, toolkit, environment):
     # pip install pyside2, because we don't have it in EDM yet
     if toolkit == 'pyside2':
         commands.append(
-            "edm run -e {environment} -- pip install pyside2"
+            "edm run -e {environment} -- pip install pyside2 shiboken2"
         )
 
     click.echo("Creating environment '{environment}'".format(**parameters))
