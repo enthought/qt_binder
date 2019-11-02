@@ -101,7 +101,12 @@ dependencies = {
 
 extra_dependencies = {
     # XXX once pyside2 is available in EDM, we will want it here
-    'pyside2': set(),
+    # We require libpng to ensure that we have a consistent set of EDM-provied
+    # libraries. Qt links against libpng, which links to libz. Without
+    # explicitly requiring libpng, the PySide2 Qt will link to the system's
+    # libpng but EDM's libz, and recent Linuxes have more recent libpngs that
+    # require more recent libzs.
+    'pyside2': {'libpng'},
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
     'pyqt5': {'pyqt5'},
 }
