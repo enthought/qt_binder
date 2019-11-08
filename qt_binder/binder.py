@@ -12,7 +12,7 @@
 #
 #------------------------------------------------------------------------------
 
-from collections import Counter, deque
+from collections import defaultdict, deque
 import keyword
 import weakref
 
@@ -25,7 +25,7 @@ from .constants import DELAYED_CONNECTION, DELAYED_SETATTR, \
     EXISTING_INSTANCE_TRAIT, EXISTING_NOTIFIERS, FORCE_INSTANCE_TRAIT, \
     FORCE_NOTIFIERS
 from .loopback_guard import LoopbackGuard
-from .qt import QtCore
+from .qt import QtCore, qt_api
 
 
 NULL_VARIANT_VALUES = {
@@ -33,14 +33,9 @@ NULL_VARIANT_VALUES = {
 }
 
 
-def _to_str(t):
+def _to_str(t, encoding='ascii'):
     if isinstance(t, QtCore.QByteArray):
-        try:
-            # PyQt4
-            t = bytes(t).decode()
-        except TypeError:
-            # PySide
-            t = str(t)
+        t = t.data().decode(encoding)
     else:
         t = str(t)
     return t
@@ -97,6 +92,12 @@ def _qt_name_for_meta_method(meta_meth):
     return _get_signature(meta_meth).split('(')[0]
 
 
+def _setter_name(getter_name):
+    """ Convert a getter name to a setter name.
+    """
+    return 'set' + getter_name[0].upper() + getter_name[1:]
+
+
 class QtTrait(TraitType):
     """ Base class for Qt proxy traits on :class:`~.Binder` classes.
 
@@ -146,7 +147,13 @@ class QtTrait(TraitType):
         slot = object.__dict__.pop(slot_name, None)
         if slot is not None:
             signal = self._get_signal(object.qobj)
-            signal.disconnect(slot)
+            # FIXME: PySide2 will raise a RuntimeError here, but it will
+            # disconnect the signal. Not sure if there are other problems.
+            try:
+                signal.disconnect(slot)
+            except RuntimeError:
+                if qt_api != 'pyside2':
+                    raise
 
     def _get_signal(self, qobj):
         """ Return the correct bound signal, especially when overloaded.
@@ -155,7 +162,7 @@ class QtTrait(TraitType):
         assert self.is_signal
         # The subclass must provide these when is_signal is True
         assert hasattr(self, 'qname') and hasattr(self, 'meta_method')
-        arg_types = self.meta_method.parameterTypes()
+        arg_types = [_to_str(arg) for arg in self.meta_method.parameterTypes()]
         signal = getattr(qobj, _python_name_for_qt_name(self.qname))
         if len(arg_types) == 0:
             return signal
@@ -188,17 +195,7 @@ class QtProperty(QtTrait):
                 msg = ("Property {0!r} not available until Binder is given "
                        "its QObject.".format(name))
                 raise AttributeError(msg)
-        try:
-            value = self.meta_prop.read(qobj)
-        except RuntimeError:
-            # PySide has a bug such that it will not return flags sometimes,
-            # like for QGroupBox.alignment.
-            name = self.meta_prop.name()
-            if hasattr(qobj, name):
-                value = getattr(qobj, name)()
-            else:
-                # Nothing else we can do.
-                raise
+        value = self.meta_prop.read(qobj)
         # PyQt4 will sometimes return a QPyNullVariant via this API even if it
         # converts it to the correct null value for the type for the property
         # attribute on the QObject itself.
@@ -217,21 +214,19 @@ class QtProperty(QtTrait):
             d = object.__dict__.setdefault(DELAYED_SETATTR, {})
             d[name] = value
             return
-        try:
-            old = self.meta_prop.read(qobj)
-        except RuntimeError:
-            # PySide has a bug such that it will not return flags sometimes,
-            # like for QGroupBox.alignment.
-            name = self.meta_prop.name()
-            if hasattr(qobj, name):
-                old = getattr(qobj, name)()
-                setter = getattr(qobj, 'set' + name.title())
-                setter(value)
-            else:
-                # Nothing else we can do.
-                raise
+        old = self.meta_prop.read(qobj)
+        if qt_api.startswith('pyside'):
+            # PySide2 has a bug such that it will not set flags properly
+            # through the QMetaProperty mechanism, like for
+            # QGroupBox.alignment.  Use names instead.
+            qname = _python_name_for_qt_name(_to_str(self.meta_prop.name()))
+            # The setter is pretty reliably named like this. The getter is
+            # sometimes not (e.g. isEditable() instead of editable()), so we
+            # continue to use the QMetaProperty.read() mechanism for that,
+            # which seems reliable in PySide2.
+            setter = getattr(qobj, _setter_name(qname))
+            setter(value)
         else:
-            # Happy path.
             self.meta_prop.write(qobj, value)
         if not self.is_signal:
             # Propagate the event notification ourselves.
@@ -299,7 +294,7 @@ class QtGetterSetter(QtTrait):
         super(QtGetterSetter, self).__init__(**metadata)
         self.getter_name = getter_name
         if setter_name is None:
-            setter_name = 'set' + getter_name.title()
+            setter_name = _setter_name(getter_name)
         self.setter_name = setter_name
 
     def get(self, object, name):
@@ -411,7 +406,8 @@ class QtSignal(QtSlot):
         else:
             # In both PyQt4 and PySide, QMetaMethod.invoke() does not
             # automatically convert the arguments, so emit it directly.
-            getattr(qobj, name).emit(*args)
+            signal = self._get_signal(qobj)
+            signal.emit(*args)
 
 
 class Rename(object):
@@ -568,6 +564,100 @@ class Binder(HasStrictTraits):
                 for func, name in connectors:
                     func(self, name)
 
+    def _collect_renamings(self, binder_class):
+        """ Collect all of the renamings requested by Rename traits.
+        """
+        renamings = {}
+        # Find all requested renamings.
+        for name in dir(binder_class):
+            obj = getattr(binder_class, name)
+            if isinstance(obj, Rename):
+                renamings[obj.qt_name] = name
+        return renamings
+
+    def _add_qt_properties(self, binder_class, renamings, seen):
+        """ Add QtProperties.
+        """
+        meta_object = binder_class.qclass.staticMetaObject
+        for i in range(meta_object.propertyCount()):
+            meta_prop = meta_object.property(i)
+            qname = _python_name_for_qt_name(meta_prop.name())
+            name = renamings.get(qname, qname)
+            if name not in seen:
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                binder_class.add_class_trait(name, QtProperty(meta_prop))
+                seen.add(name)
+
+    def _add_qt_signals_slots(self, binder_class, renamings, seen):
+        """ Add QtSignals and QtSlots.
+        """
+        meta_object = binder_class.qclass.staticMetaObject
+        overloads = defaultdict(list)
+        for i in range(meta_object.methodCount()):
+            meta_meth = meta_object.method(i)
+            qname = _python_name_for_qt_name(
+                _qt_name_for_meta_method(meta_meth))
+            name = renamings.get(qname, qname)
+            overloads[name].append(meta_meth)
+
+        for name, methods in overloads.items():
+            method_type = methods[0].methodType()
+            if method_type == QtCore.QMetaMethod.Slot:
+                trait_type = QtSlot
+            elif method_type == QtCore.QMetaMethod.Signal:
+                trait_type = QtSignal
+            else:
+                continue
+            for meta_meth in methods:
+                if len(methods) > 1:
+                    # Add the argument types to the name to disambiguate.
+                    arg_types = [_to_str(t).rstrip('*')
+                                 for t in meta_meth.parameterTypes()]
+                    qualname = '_'.join([name] + arg_types)
+                else:
+                    qualname = name
+                if qualname not in seen:
+                    if qualname.endswith('_'):
+                        # See #21
+                        continue
+                    trait = trait_type(meta_meth)
+                    binder_class.add_class_trait(qualname, trait)
+                    seen.add(qualname)
+
+    def _add_implied_properties(self, binder_class, renamings, seen):
+        """ Add properties defined by pairs of getters and setters.
+        """
+        # Add all getter/setter pairs that we can identify.
+        methods = set()
+        for name, class_attr in vars(binder_class.qclass).items():
+            # sip methoddescriptor objects do not have __call__() defined.
+            if (callable(class_attr) or
+                    type(class_attr).__name__ == 'methoddescriptor'):
+                methods.add(name)
+        for qname in methods:
+            # FIXME: We do not know if these are true getter/setters, where
+            # the getter has 0 arguments and the setter has just the 1. For
+            # example, `QObject.property(name)` and
+            # `QObject.setProperty(name, value)` get misidentified here.
+            # Unfortunately, the method objects do not have any information
+            # about their argument structure.
+            if qname == 'property':
+                continue
+            putative_setter = _setter_name(qname)
+            if putative_setter in methods:
+                name = renamings.get(qname, qname)
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                if name in seen:
+                    # We've done this pair earlier, probably through the
+                    # QMetaProperty mechanism, so we can ignore it here.
+                    continue
+                binder_class.add_class_trait(
+                    name, QtGetterSetter(qname, putative_setter))
+
     def _initialize_binder_class(self):
         """ Ensure that the binder class has been initialized.
         """
@@ -578,83 +668,11 @@ class Binder(HasStrictTraits):
         # still only want to look directly at this class, not its superclasses.
         initialized = binder_class.__dict__.get(initialized_name, False)
         if not initialized:
-            renamings = {}
-            # Find all requested renamings.
-            for name in dir(binder_class):
-                obj = getattr(binder_class, name)
-                if isinstance(obj, Rename):
-                    renamings[obj.qt_name] = name
-            qt_class = binder_class.qclass
-            meta_object = qt_class.staticMetaObject
+            renamings = self._collect_renamings(binder_class)
             seen = set(binder_class.class_trait_names())
-            for i in range(meta_object.propertyCount()):
-                meta_prop = meta_object.property(i)
-                qname = _python_name_for_qt_name(meta_prop.name())
-                name = renamings.get(qname, qname)
-                if name not in seen:
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    binder_class.add_class_trait(name, QtProperty(meta_prop))
-                    seen.add(name)
-
-            # Ignore any from the superclass or explicitly defined.
-            method_names = []
-            method_name_counts = Counter()
-            for i in range(meta_object.methodCount()):
-                meta_meth = meta_object.method(i)
-                qname = _python_name_for_qt_name(
-                    _qt_name_for_meta_method(meta_meth))
-                name = renamings.get(qname, qname)
-                method_names.append(name)
-                method_name_counts[name] += 1
-            for i in range(meta_object.methodCount()):
-                meta_meth = meta_object.method(i)
-                qname = _python_name_for_qt_name(
-                    _qt_name_for_meta_method(meta_meth))
-                name = renamings.get(qname, qname)
-                if method_name_counts[name] > 1:
-                    # Add the argument types to the name to disambiguate.
-                    arg_types = [_to_str(t).rstrip('*')
-                                 for t in meta_meth.parameterTypes()]
-                    name = '_'.join([name] + arg_types)
-                if name not in seen:
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    method_type = meta_meth.methodType()
-                    if method_type == meta_meth.Signal:
-                        trait = QtSignal(meta_meth)
-                    elif method_type == meta_meth.Slot:
-                        trait = QtSlot(meta_meth)
-                    else:
-                        continue
-                    binder_class.add_class_trait(name, trait)
-                    seen.add(name)
-
-            # Add all getter/setter pairs that we can identify.
-            methods = set()
-            for name, class_attr in vars(qt_class).items():
-                # sip methoddescriptor objects do not have __call__() defined.
-                if (callable(class_attr) or
-                        type(class_attr).__name__ == 'methoddescriptor'):
-                    methods.add(name)
-            methods.difference_update(seen)
-            for qname in methods:
-                # FIXME: We do not know if these are true getter/setters, where
-                # the getter has 0 arguments and the setter has just the 1. For
-                # example, `QObject.property(name)` and
-                # `QObject.setProperty(name, value)` get misidentified here.
-                # Unfortunately, the method objects do not have any information
-                # about their argument structure.
-                putative_setter = 'set' + qname.title()
-                if putative_setter in methods:
-                    name = renamings.get(qname, qname)
-                    if name.endswith('_'):
-                        # See #21
-                        continue
-                    binder_class.add_class_trait(
-                        name, QtGetterSetter(qname, putative_setter))
+            self._add_qt_properties(binder_class, renamings, seen)
+            self._add_qt_signals_slots(binder_class, renamings, seen)
+            self._add_implied_properties(binder_class, renamings, seen)
             setattr(binder_class, initialized_name, True)
 
     def _qobj_changed(self, old, new):

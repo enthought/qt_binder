@@ -101,7 +101,12 @@ dependencies = {
 
 extra_dependencies = {
     # XXX once pyside2 is available in EDM, we will want it here
-    'pyside2': set(),
+    # We require libpng to ensure that we have a consistent set of EDM-provied
+    # libraries. Qt links against libpng, which links to libz. Without
+    # explicitly requiring libpng, the PySide2 Qt will link to the system's
+    # libpng but EDM's libz, and recent Linuxes have more recent libpngs that
+    # require more recent libzs.
+    'pyside2': {'libpng'},
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
     'pyqt5': {'pyqt5'},
 }
@@ -139,7 +144,7 @@ def install(runtime, toolkit, environment):
     # pip install pyside2, because we don't have it in EDM yet
     if toolkit == 'pyside2':
         commands.append(
-            "edm run -e {environment} -- pip install pyside2"
+            "edm run -e {environment} -- pip install pyside2 shiboken2"
         )
 
     click.echo("Creating environment '{environment}'".format(**parameters))
@@ -151,16 +156,23 @@ def install(runtime, toolkit, environment):
 @click.option('--runtime', default='3.6')
 @click.option('--toolkit', default='pyqt')
 @click.option('--environment', default=None)
-def test(runtime, toolkit, environment):
+@click.argument('test_spec', nargs=-1)
+def test(runtime, toolkit, environment, test_spec):
     """ Run the test suite in a given environment with the specified toolkit.
 
     """
     parameters = get_parameters(runtime, toolkit, environment)
     environ = environment_vars.get(toolkit, {}).copy()
     environ['PYTHONUNBUFFERED'] = "1"
-    commands = [
-        "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
-    ]
+    if len(test_spec) == 0:
+        commands = [
+            "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
+        ]
+    else:
+        commands = [
+            ("edm run -e {environment} -- coverage run -p -m unittest -v " +
+             " ".join(test_spec))
+        ]
 
     # We run in a tempdir to avoid accidentally picking up wrong package
     # code from a local dir.  We need to ensure a good .coveragerc is in
