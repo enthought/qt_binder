@@ -1,6 +1,17 @@
 QtBinder CHANGELOG
 ==================
 
+Release 0.3
+-----------
+
+This release drops support for Python versions older than 3.6
+
+Features
+
+* Added support for PyQt5 (#58)
+* Added support for PySide2 (#60)
+
+
 Release 0.2.1
 -------------
 
