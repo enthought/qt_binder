@@ -60,17 +60,17 @@ class Model(HasTraits):
                         title=u'Events',
                     ),
                 ),
-                ('push_buttons.buttonClicked_QAbstractButton >> '
+                ('push_buttons.buttonClicked >> '
                  'object.last_clicked_button'),
-                ('push_buttons.buttonPressed_QAbstractButton >> '
+                ('push_buttons.buttonPressed >> '
                  'object.last_pressed_button'),
-                ('push_buttons.buttonReleased_QAbstractButton >> '
+                ('push_buttons.buttonReleased >> '
                  'object.last_released_button'),
-                ('radio_buttons.buttonClicked_QAbstractButton >> '
+                ('radio_buttons.buttonClicked >> '
                  'object.last_clicked_button'),
-                ('radio_buttons.buttonPressed_QAbstractButton >> '
+                ('radio_buttons.buttonPressed >> '
                  'object.last_pressed_button'),
-                ('radio_buttons.buttonReleased_QAbstractButton >> '
+                ('radio_buttons.buttonReleased >> '
                  'object.last_released_button'),
                 ('clicked.text << (object.last_clicked_button).text() '
                  'if object.last_clicked_button else u""'),
