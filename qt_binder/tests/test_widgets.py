@@ -110,15 +110,8 @@ class TestEditableComboBox(unittest.TestCase, BaseTestWithGui):
             def slot(value):
                 received.append(value)
 
-            combo.on_trait_change(slot, 'currentIndexChanged_int')
+            combo.on_trait_change(slot, 'currentIndexChanged')
             combo.setCurrentIndex(2)
             self.assertEqual(received, [2])
             received[:] = []
-            combo.on_trait_change(slot, 'currentIndexChanged_int', remove=True)
-
-            combo.on_trait_change(slot, 'currentIndexChanged_QString')
-            combo.setCurrentIndex(0)
-            self.assertEqual(received, ['zero'])
-            received[:] = []
-            combo.on_trait_change(slot, 'currentIndexChanged_QString',
-                                  remove=True)
+            combo.on_trait_change(slot, 'currentIndexChanged', remove=True)

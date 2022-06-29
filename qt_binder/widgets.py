@@ -146,7 +146,7 @@ class EditableComboBox(ComboBox):
             else:
                 qobj.setCurrentIndex(new_index)
 
-    @on_trait_change('currentIndexChanged_int')
+    @on_trait_change('currentIndexChanged')
     def _on_currentIndexChanged(self, index):
         if index != -1 and 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
@@ -200,7 +200,7 @@ class EnumDropDown(ComboBox):
             qobj.addItems(labels)
             qobj.setCurrentIndex(new_index)
 
-    @on_trait_change('currentIndexChanged_int')
+    @on_trait_change('currentIndexChanged')
     def _on_currentIndexChanged(self, index):
         if 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
