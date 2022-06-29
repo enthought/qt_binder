@@ -87,7 +87,8 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '3.6': {'pyside2', 'pyqt', 'pyqt5'},
+    '3.6': {'pyside2', 'pyqt', 'pyqt5', 'pyside6'},
+    '3.8': {'pyside6'},
 }
 
 dependencies = {
@@ -109,10 +110,12 @@ extra_dependencies = {
     'pyside2': {'libpng'},
     'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
     'pyqt5': {'pyqt5'},
+    'pyside6': {'pyside6'},
 }
 
 environment_vars = {
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
+    'pyside6': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside6'},
     'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
     'pyqt5': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt5'},
 }
