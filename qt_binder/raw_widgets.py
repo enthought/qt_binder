@@ -39,8 +39,10 @@ class DialogButtonBox(Binder):
     qclass = QtGui.QDialogButtonBox
 
 
-class DesktopWidget(Binder):
-    qclass = QtGui.QDesktopWidget
+# PySide 6 removes this class in favor of QScreen (unwrapped)
+if hasattr(QtGui, 'QDesktopWidget'):
+    class DesktopWidget(Binder):
+        qclass = QtGui.QDesktopWidget
 
 
 class LineEdit(Binder):
