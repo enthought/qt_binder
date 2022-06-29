@@ -29,6 +29,10 @@ else:
             from PySide.QtUiTools import QUiLoader
         elif qt_api == 'pyside2':
             from PySide2.QtUiTools import QUiLoader
+        elif qt_api == 'pyside6':
+            from PySide6.QtUiTools import QUiLoader
+        else:
+            raise RuntimeError(f"Unrecognized qt_api = {qt_api!r}")
 
         class RecordingUiLoader(QUiLoader):
             """ Record the names of widgets as they are created.
