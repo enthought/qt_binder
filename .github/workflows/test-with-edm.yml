@@ -17,8 +17,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        runtime: []
-        toolkit: []
         include:
           # Only allowable combinations.
           - runtime: '3.6'
