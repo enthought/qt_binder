@@ -1,18 +1,12 @@
-#------------------------------------------------------------------------------
+# (C) Copyright 2014-2022 Enthought, Inc., Austin, TX
+# All rights reserved.
 #
-#  Copyright (c) 2014-2015, Enthought, Inc.
-#  All rights reserved.
+# This software is provided without warranty under the terms of the BSD
+# license included in LICENSE.txt and may be redistributed only under
+# the conditions described in the aforementioned license. The license
+# is also available online at http://www.enthought.com/licenses/BSD.txt
 #
-#  This software is provided without warranty under the terms of the BSD
-#  license included in LICENSE.txt and may be redistributed only
-#  under the conditions described in the aforementioned license.  The license
-#  is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#  Thanks for using Enthought open source!
-#
-#------------------------------------------------------------------------------
-
-from __future__ import print_function
+# Thanks for using Enthought open source!
 
 import os
 import sys
@@ -119,6 +113,7 @@ def main():
     print('Convert: {0.convert_units}'.format(m))
     print('Output: {0.output_units}'.format(m))
     print('Valid: {0.output_units_valid}'.format(m))
+
 
 if __name__ == '__main__':
     main()
