@@ -21,7 +21,7 @@ from traits.api import Bool, Instance, pop_exception_handler, \
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
-from ..qt import QtCore, QtGui, qt_api
+from ..qt import QtCore, QtGui
 
 
 class TestBinder(unittest.TestCase):

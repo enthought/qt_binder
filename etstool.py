@@ -138,7 +138,8 @@ def install(runtime, toolkit, environment):
     commands = [
         "edm environments create {environment} --force --version={runtime}",
         "edm install -y -e {environment} " + packages,
-        "edm run -e {environment} -- pip install -r ci-src-requirements.txt --no-dependencies",
+        ("edm run -e {environment} -- pip install -r ci-src-requirements.txt "
+         "--no-dependencies"),
         "edm run -e {environment} -- python setup.py clean --all",
         "edm run -e {environment} -- python setup.py install"
     ]
@@ -167,7 +168,8 @@ def test(runtime, toolkit, environment, test_spec):
     environ['PYTHONUNBUFFERED'] = "1"
     if len(test_spec) == 0:
         commands = [
-            "edm run -e {environment} -- coverage run -p -m unittest discover -v qt_binder"
+            ("edm run -e {environment} -- coverage run -p -m unittest "
+             "discover -v qt_binder")
         ]
     else:
         commands = [
@@ -257,15 +259,20 @@ def test_all():
 # Utility routines
 # ----------------------------------------------------------------------------
 
+
 def get_parameters(runtime, toolkit, environment):
     """ Set up parameters dictionary for format() substitution """
-    parameters = {'runtime': runtime, 'toolkit': toolkit, 'environment': environment}
-    if toolkit not in supported_combinations[runtime] :
+    parameters = {
+        'runtime': runtime,
+        'toolkit': toolkit,
+        'environment': environment}
+    if toolkit not in supported_combinations[runtime]:
         msg = ("Python {runtime} and toolkit {toolkit} not supported by " +
                "test environments")
         raise RuntimeError(msg.format(**parameters))
     if environment is None:
-        parameters['environment'] = 'qtbinder-test-{runtime}-{toolkit}'.format(**parameters)
+        parameters['environment'] = 'qtbinder-test-{runtime}-{toolkit}'.format(
+            **parameters)
     return parameters
 
 
