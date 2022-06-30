@@ -23,6 +23,8 @@ jobs:
             toolkit: 'pyqt5'
           - runtime: '3.6'
             toolkit: 'pyside2'
+          - runtime: '3.6'
+            toolkit: 'pyside6'
           - runtime: '3.8'
             toolkit: 'pyside6'
     runs-on: ${{ matrix.os }}

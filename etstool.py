@@ -87,7 +87,7 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '3.6': {'pyside2', 'pyqt5'},
+    '3.6': {'pyside2', 'pyqt5', 'pyside6'},
     '3.8': {'pyside6'},
 }
 
@@ -109,7 +109,7 @@ extra_dependencies = {
     # require more recent libzs.
     'pyside2': {'libpng'},
     'pyqt5': {'pyqt5'},
-    'pyside6': {'pyside6'},
+    'pyside6': set(),
 }
 
 environment_vars = {
@@ -143,10 +143,22 @@ def install(runtime, toolkit, environment):
         "edm run -e {environment} -- python setup.py clean --all",
         "edm run -e {environment} -- python setup.py install"
     ]
-    # pip install pyside2, because we don't have it in EDM yet
+    # pip install pyside2 or pyside6, because we don't have them in EDM yet
     if toolkit == 'pyside2':
         commands.append(
             "edm run -e {environment} -- pip install pyside2 shiboken2"
+        )
+    elif toolkit == "pyside6":
+        if sys.platform == 'darwin':
+            commands.append(
+                "edm run -e {environment} -- pip install pyside6<6.2.2'"
+            )
+        else:
+            commands.append(
+                "edm run -e {environment} -- pip install pyside6"
+            )
+        commands.append(
+            "edm run -e {environment} -- pip install pillow"
         )
 
     click.echo("Creating environment '{environment}'".format(**parameters))
