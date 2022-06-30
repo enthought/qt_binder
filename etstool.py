@@ -54,8 +54,8 @@ using::
 
     python etstool.py test_all
 
-The currently supported runtime value is ``3.6``, and currently supported
-toolkits are ``pyqt``, ``pyqt5``, and ``pyside2``.  Not all
+The currently supported runtime values are ``3.6`` and ``3.8``, and currently
+supported toolkits are ``pyqt5``, ``pyside2``, and ``pyside6``.  Not all
 combinations of toolkits and runtimes will work, but the tasks will fail with
 a clear error if that is the case.
 
@@ -87,7 +87,7 @@ from contextlib import contextmanager
 import click
 
 supported_combinations = {
-    '3.6': {'pyside2', 'pyqt', 'pyqt5', 'pyside6'},
+    '3.6': {'pyside2', 'pyqt5'},
     '3.8': {'pyside6'},
 }
 
@@ -108,7 +108,6 @@ extra_dependencies = {
     # libpng but EDM's libz, and recent Linuxes have more recent libpngs that
     # require more recent libzs.
     'pyside2': {'libpng'},
-    'pyqt': {'pyqt<4.12'},  # FIXME: build of 4.12-1 appears to be bad
     'pyqt5': {'pyqt5'},
     'pyside6': {'pyside6'},
 }
@@ -116,7 +115,6 @@ extra_dependencies = {
 environment_vars = {
     'pyside2': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside2'},
     'pyside6': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside6'},
-    'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
     'pyqt5': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt5'},
 }
 
@@ -128,7 +126,7 @@ def cli():
 
 @cli.command()
 @click.option('--runtime', default='3.6')
-@click.option('--toolkit', default='pyqt')
+@click.option('--toolkit', default='pyside2')
 @click.option('--environment', default=None)
 def install(runtime, toolkit, environment):
     """ Install project and dependencies into a clean EDM environment.
@@ -157,7 +155,7 @@ def install(runtime, toolkit, environment):
 
 @cli.command()
 @click.option('--runtime', default='3.6')
-@click.option('--toolkit', default='pyqt')
+@click.option('--toolkit', default='pyside2')
 @click.option('--environment', default=None)
 @click.argument('test_spec', nargs=-1)
 def test(runtime, toolkit, environment, test_spec):
@@ -187,9 +185,10 @@ def test(runtime, toolkit, environment, test_spec):
         execute(commands, parameters)
     click.echo('Done test')
 
+
 @cli.command()
 @click.option('--runtime', default='3.6')
-@click.option('--toolkit', default='pyqt')
+@click.option('--toolkit', default='pyside2')
 @click.option('--environment', default=None)
 def cleanup(runtime, toolkit, environment):
     """ Remove a development environment.
@@ -206,7 +205,7 @@ def cleanup(runtime, toolkit, environment):
 
 @cli.command()
 @click.option('--runtime', default='3.6')
-@click.option('--toolkit', default='pyqt')
+@click.option('--toolkit', default='pyside2')
 def test_clean(runtime, toolkit):
     """ Run tests in a clean environment, cleaning up afterwards
 
@@ -218,9 +217,10 @@ def test_clean(runtime, toolkit):
     finally:
         cleanup(args=args, standalone_mode=False)
 
+
 @cli.command()
 @click.option('--runtime', default='3.6')
-@click.option('--toolkit', default='pyqt')
+@click.option('--toolkit', default='pyside2')
 @click.option('--environment', default=None)
 def update(runtime, toolkit, environment):
     """ Update/Reinstall package into environment.
