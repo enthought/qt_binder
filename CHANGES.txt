@@ -1,6 +1,21 @@
 QtBinder CHANGELOG
 ==================
 
+Release 0.4
+-----------
+
+This release adds support for PySide6/Qt6. Qt6 dropped some signal overloads,
+which require some changes to the wrapping strategy. Now, the first overload is
+given the plain unqualified name of the signal, without the extra type
+information. This usually corresponds to the signal that remains in Qt6. For
+example, `QComboBox.currentIndexChanged(int)` is now the sole implementation of
+that signal in Qt6, so the trait created for it is now just
+`currentIndexChanged` and not `currentIndexChanged_int`.
+
+Features
+
+* Added support for PySide6 (#66)
+
 Release 0.3
 -----------
 
