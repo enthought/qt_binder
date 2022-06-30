@@ -1,1 +1,1 @@
-from PyQt4.QtNetwork import *  # noqa
+from pyface.qt.QtNetwork import *  # noqa
