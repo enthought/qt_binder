@@ -1,16 +1,12 @@
-#------------------------------------------------------------------------------
+# (C) Copyright 2014-2022 Enthought, Inc., Austin, TX
+# All rights reserved.
 #
-#  Copyright (c) 2014-2015, Enthought, Inc.
-#  All rights reserved.
+# This software is provided without warranty under the terms of the BSD
+# license included in LICENSE.txt and may be redistributed only under
+# the conditions described in the aforementioned license. The license
+# is also available online at http://www.enthought.com/licenses/BSD.txt
 #
-#  This software is provided without warranty under the terms of the BSD
-#  license included in LICENSE.txt and may be redistributed only
-#  under the conditions described in the aforementioned license.  The license
-#  is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#  Thanks for using Enthought open source!
-#
-#------------------------------------------------------------------------------
+# Thanks for using Enthought open source!
 
 from collections import defaultdict, deque
 import keyword
@@ -152,7 +148,7 @@ class QtTrait(TraitType):
             try:
                 signal.disconnect(slot)
             except RuntimeError:
-                if qt_api != 'pyside2':
+                if qt_api not in ('pyside2', 'pyside6'):
                     raise
 
     def _get_signal(self, qobj):
@@ -610,32 +606,52 @@ class Binder(HasStrictTraits):
                 trait_type = QtSignal
             else:
                 continue
-            for meta_meth in methods:
-                if len(methods) > 1:
-                    # Add the argument types to the name to disambiguate.
+            # In the case of overloads, always register the first one
+            # unqualified. This is largely to support across the gap between
+            # Qt4 and Qt6 where some slots lost their overloads.
+            # C.f. QComboBox.currentIndexChanged()
+            meta_meth = methods[0]
+            if name not in seen:
+                if name.endswith('_'):
+                    # See #21
+                    continue
+                trait = trait_type(meta_meth)
+                binder_class.add_class_trait(name, trait)
+                seen.add(name)
+            # If there are overloads, qualify the name with the types to
+            # provide disambiguation.
+            if len(methods) > 1:
+                for meta_meth in methods:
+                    # Add the argument types to the name to disambiguate
                     arg_types = [_to_str(t).rstrip('*')
                                  for t in meta_meth.parameterTypes()]
                     qualname = '_'.join([name] + arg_types)
-                else:
-                    qualname = name
-                if qualname not in seen:
-                    if qualname.endswith('_'):
-                        # See #21
-                        continue
-                    trait = trait_type(meta_meth)
-                    binder_class.add_class_trait(qualname, trait)
-                    seen.add(qualname)
+                    if qualname not in seen:
+                        if qualname.endswith('_'):
+                            # See #21
+                            continue
+                        trait = trait_type(meta_meth)
+                        binder_class.add_class_trait(qualname, trait)
+                        seen.add(qualname)
 
     def _add_implied_properties(self, binder_class, renamings, seen):
         """ Add properties defined by pairs of getters and setters.
         """
         # Add all getter/setter pairs that we can identify.
         methods = set()
-        for name, class_attr in vars(binder_class.qclass).items():
-            # sip methoddescriptor objects do not have __call__() defined.
-            if (callable(class_attr) or
-                    type(class_attr).__name__ == 'methoddescriptor'):
-                methods.add(name)
+        # Use getmembers() to collect inherited methods from ancestor classes,
+        # too.
+        for cls in binder_class.qclass.mro():
+            if not issubclass(cls, QtCore.QObject):
+                break
+            for name in dir(cls):
+                if name.startswith('__'):
+                    continue
+                class_attr = getattr(binder_class.qclass, name)
+                # sip methoddescriptor objects do not have __call__() defined.
+                if (callable(class_attr) or
+                        type(class_attr).__name__ == 'methoddescriptor'):
+                    methods.add(name)
         for qname in methods:
             # FIXME: We do not know if these are true getter/setters, where
             # the getter has 0 arguments and the setter has just the 1. For

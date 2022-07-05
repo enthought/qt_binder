@@ -1,16 +1,12 @@
-#------------------------------------------------------------------------------
+# (C) Copyright 2014-2022 Enthought, Inc., Austin, TX
+# All rights reserved.
 #
-#  Copyright (c) 2014-2015, Enthought, Inc.
-#  All rights reserved.
+# This software is provided without warranty under the terms of the BSD
+# license included in LICENSE.txt and may be redistributed only under
+# the conditions described in the aforementioned license. The license
+# is also available online at http://www.enthought.com/licenses/BSD.txt
 #
-#  This software is provided without warranty under the terms of the BSD
-#  license included in LICENSE.txt and may be redistributed only
-#  under the conditions described in the aforementioned license.  The license
-#  is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#  Thanks for using Enthought open source!
-#
-#------------------------------------------------------------------------------
+# Thanks for using Enthought open source!
 
 import unittest
 
@@ -21,7 +17,7 @@ from traits.api import Bool, Instance, pop_exception_handler, \
 
 from ..binder import Binder, Composite, Default, QtDynamicProperty, \
     QtGetterSetter, QtProperty, QtSignal, QtSlot, Rename
-from ..qt import QtCore, QtGui, qt_api
+from ..qt import QtCore, QtGui
 
 
 class TestBinder(unittest.TestCase):
@@ -44,6 +40,11 @@ class TestBinder(unittest.TestCase):
             x = QtDynamicProperty(10)
 
         self.Object = Object
+
+        class Timer(Binder):
+            qclass = QtCore.QTimer
+
+        self.Timer = Timer
 
     def tearDown(self):
         pop_exception_handler()
@@ -104,7 +105,9 @@ class TestBinder(unittest.TestCase):
         obj.dispose()
 
     def test_getter_setter(self):
-        obj = self.Object()
+        # Use QTimer instead of QObject to ensure that inherited
+        # getters/setters are discovered.
+        obj = self.Timer()
         with self.assertRaises(AttributeError):
             obj.parent
         parent_qobj = QtCore.QObject()
@@ -141,71 +144,63 @@ class TestBinder(unittest.TestCase):
         obj.dispose()
 
     def test_signal(self):
-        obj = self.Object()
+        # The only signal on QObject is `destroyed()`, which is problematic to
+        # emit on your own under PySide6.
+        obj = self.Timer()
         with self.assertRaises(AttributeError):
-            obj.destroyed
+            obj.timeout
 
-        obj.destroyed = True
-        qobj = QtCore.QObject()
+        obj.timeout = True
+        qobj = QtCore.QTimer()
         received = []
 
         def handler():
             received.append(True)
 
-        qobj.destroyed.connect(handler)
+        qobj.timeout.connect(handler)
 
         obj.qobj = qobj
         obj.configure()
 
         self.assertEqual(received, [True])
-        obj.destroyed = True
+        obj.timeout = True
         self.assertEqual(received, [True, True])
 
         obj.dispose()
 
     def test_delayed_connection(self):
-        obj = self.Object()
+        obj = self.Timer()
         received = []
 
         def handler(new):
             received.append(new)
 
-        obj.on_trait_change(handler, 'destroyed')
+        obj.on_trait_change(handler, 'timeout')
         with self.assertRaises(AttributeError):
-            obj.destroyed
+            obj.timeout
 
         obj.construct()
         qobj = obj.qobj
         obj.configure()
 
-        self.assertEqual(type(obj.destroyed), type(qobj.destroyed))
+        self.assertEqual(type(obj.timeout), type(qobj.timeout))
 
         # Check delayed signal.
-        qobj.destroyed[QtCore.QObject].emit(qobj)
+        qobj.timeout.emit()
 
-        if qt_api.startswith('pyqt'):
-            # When there are 2 overloads for a signal and one of the is
-            # argumentless, we actually get the single-argument version regardless.
-            # This is actually typically what we want, but I'm noting it because
-            # this behavior did change when we redid the signal implementation to
-            # conform to the limitations of the PyQt5 signal implementation.
-            six.assertCountEqual(self, received, [qobj])
-        elif qt_api.startswith('pyside'):
-            # But PySides don't, and I haven't found a good way to rationalize
-            # the two.
-            six.assertCountEqual(self, received, [()])
+        six.assertCountEqual(self, received, [()])
 
         # No signal after removal.
         received[:] = []
-        obj.on_trait_change(handler, 'destroyed', remove=True)
+        obj.on_trait_change(handler, 'timeout', remove=True)
 
-        qobj.destroyed[QtCore.QObject].emit(qobj)
+        qobj.timeout.emit()
         self.assertEqual(received, [])
 
         # No signal after disposal.
-        obj.on_trait_change(handler, 'destroyed')
+        obj.on_trait_change(handler, 'timeout')
         obj.dispose()
-        qobj.destroyed[QtCore.QObject].emit(qobj)
+        qobj.timeout.emit()
         self.assertEqual(received, [])
 
     def test_composite(self):

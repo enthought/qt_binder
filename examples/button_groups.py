@@ -1,16 +1,12 @@
-#------------------------------------------------------------------------------
+# (C) Copyright 2014-2022 Enthought, Inc., Austin, TX
+# All rights reserved.
 #
-#  Copyright (c) 2014-2015, Enthought, Inc.
-#  All rights reserved.
+# This software is provided without warranty under the terms of the BSD
+# license included in LICENSE.txt and may be redistributed only under
+# the conditions described in the aforementioned license. The license
+# is also available online at http://www.enthought.com/licenses/BSD.txt
 #
-#  This software is provided without warranty under the terms of the BSD
-#  license included in LICENSE.txt and may be redistributed only
-#  under the conditions described in the aforementioned license.  The license
-#  is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#  Thanks for using Enthought open source!
-#
-#------------------------------------------------------------------------------
+# Thanks for using Enthought open source!
 
 import os
 import sys
@@ -60,17 +56,17 @@ class Model(HasTraits):
                         title=u'Events',
                     ),
                 ),
-                ('push_buttons.buttonClicked_QAbstractButton >> '
+                ('push_buttons.buttonClicked >> '
                  'object.last_clicked_button'),
-                ('push_buttons.buttonPressed_QAbstractButton >> '
+                ('push_buttons.buttonPressed >> '
                  'object.last_pressed_button'),
-                ('push_buttons.buttonReleased_QAbstractButton >> '
+                ('push_buttons.buttonReleased >> '
                  'object.last_released_button'),
-                ('radio_buttons.buttonClicked_QAbstractButton >> '
+                ('radio_buttons.buttonClicked >> '
                  'object.last_clicked_button'),
-                ('radio_buttons.buttonPressed_QAbstractButton >> '
+                ('radio_buttons.buttonPressed >> '
                  'object.last_pressed_button'),
-                ('radio_buttons.buttonReleased_QAbstractButton >> '
+                ('radio_buttons.buttonReleased >> '
                  'object.last_released_button'),
                 ('clicked.text << (object.last_clicked_button).text() '
                  'if object.last_clicked_button else u""'),
@@ -93,6 +89,7 @@ class Model(HasTraits):
 
 def main():
     Model().configure_traits()
+
 
 if __name__ == '__main__':
     main()

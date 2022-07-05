@@ -1,16 +1,12 @@
-#------------------------------------------------------------------------------
+# (C) Copyright 2014-2022 Enthought, Inc., Austin, TX
+# All rights reserved.
 #
-#  Copyright (c) 2014-2015, Enthought, Inc.
-#  All rights reserved.
+# This software is provided without warranty under the terms of the BSD
+# license included in LICENSE.txt and may be redistributed only under
+# the conditions described in the aforementioned license. The license
+# is also available online at http://www.enthought.com/licenses/BSD.txt
 #
-#  This software is provided without warranty under the terms of the BSD
-#  license included in LICENSE.txt and may be redistributed only
-#  under the conditions described in the aforementioned license.  The license
-#  is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#  Thanks for using Enthought open source!
-#
-#------------------------------------------------------------------------------
+# Thanks for using Enthought open source!
 
 from __future__ import division
 
@@ -146,7 +142,7 @@ class EditableComboBox(ComboBox):
             else:
                 qobj.setCurrentIndex(new_index)
 
-    @on_trait_change('currentIndexChanged_int')
+    @on_trait_change('currentIndexChanged')
     def _on_currentIndexChanged(self, index):
         if index != -1 and 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
@@ -200,7 +196,7 @@ class EnumDropDown(ComboBox):
             qobj.addItems(labels)
             qobj.setCurrentIndex(new_index)
 
-    @on_trait_change('currentIndexChanged_int')
+    @on_trait_change('currentIndexChanged')
     def _on_currentIndexChanged(self, index):
         if 'value' not in self.loopback_guard:
             with self.loopback_guard('value'):
