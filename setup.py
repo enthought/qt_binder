@@ -17,7 +17,7 @@ QtBinder provides a way to bind Qt widgets to Traits models.
 
 setup(
     name='qt_binder',
-    version='0.3',
+    version='0.4',
     author='Enthought, Inc.',
     author_email='info@enthought.com',
     description='Traits bindings for Qt',
