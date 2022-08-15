@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>Welcome to QtBinder! &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-extend.css">
+    <link rel="stylesheet" href="_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="_static/img/favicon.png">
+    <link rel="index" title="Index" href="genindex.html" >
+    <link rel="search" title="Search" href="search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="#" >
+    <link rel="next" title="Core Principles" href="principles.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="principles.html" title="Core Principles"
+           accesskey="N">next</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="welcome-to-qtbinder">
+<h1>Welcome to QtBinder!<a class="headerlink" href="#welcome-to-qtbinder" title="Permalink to this headline">¶</a></h1>
+<p>QtBinder thinly wraps Qt widgets with Traits.</p>
+<p>The main goal of QtBinder is to provide a way to build Qt UIs with Traits
+models with an emphasis on transparency and flexibility. The core is the
+<a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> class that automatically wraps a <code class="docutils literal notranslate"><span class="pre">QObject</span></code> and exposes its properties,
+signals, and slots as traits. Subclasses of a particular <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> can add
+traits and methods to customize the widget and expose useful patterns of
+communication between UI and model over the raw Qt API.</p>
+<p><a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> widgets can be used inside a Traits UI <code class="docutils literal notranslate"><span class="pre">View</span></code> using a special <code class="docutils literal notranslate"><span class="pre">Item</span></code>
+called <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a>. <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> widgets can be bound to model traits using
+<a class="reference internal" href="traits_ui.html#traits-ui"><span class="std std-ref">binding expressions</span></a>.</p>
+<div class="section" id="when-do-i-use-qtbinder-over-traits-ui">
+<span id="why-qt-binder"></span><h2>When do I use QtBinder over Traits UI?<a class="headerlink" href="#when-do-i-use-qtbinder-over-traits-ui" title="Permalink to this headline">¶</a></h2>
+<p>The two major pain points of Traits UI are getting widgets laid out precisely
+the way you need them to and customizing the behavior of editors in ways not
+intended by the original author. QtBinder addresses the layout problem by
+providing access to all of the layout tools that raw Qt has. It is even
+possible to lay out widgets in Qt Designer and attach the appropriate <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+to each widget.</p>
+<p><a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> can be used to replace one normal <code class="docutils literal notranslate"><span class="pre">Item</span></code> in a Traits UI <code class="docutils literal notranslate"><span class="pre">View</span></code>, or by
+using a hierarchical layout <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>, it can replace some or all of what you
+would otherwise use normal Traits UI <code class="docutils literal notranslate"><span class="pre">Groups</span></code> for layout. You can use as much
+or as little of QtBinder as you need. It is easy to spot-fix the behavior of
+just one editor by replacing it with a <code class="docutils literal notranslate"><span class="pre">Binder</span></code> and leave the rest of the
+<code class="docutils literal notranslate"><span class="pre">View</span></code> alone. You do not have to wait until QtBinder has replicated the
+functionality of all Traits UI editors before using it to solve smaller
+problems.</p>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="principles.html">Core Principles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="traits_ui.html">Traits UI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">To Do</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="todo.html#short-term">Short Term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="todo.html#long-term">Long Term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="todo.html#un-goals">Un-goals</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/binder.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.binder</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/binding.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.binding</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/bound_editor.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.bound_editor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/raw_widgets.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.raw_widgets</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/type_registry.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.type_registry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/widgets.html"><code class="docutils literal notranslate"><span class="pre">qt_binder.widgets</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to QtBinder!</a><ul>
+<li><a class="reference internal" href="#when-do-i-use-qtbinder-over-traits-ui">When do I use QtBinder over Traits UI?</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="principles.html"
+                        title="next chapter">Core Principles</a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="_sources/index.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

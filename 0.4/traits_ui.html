@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>Traits UI Integration &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-extend.css">
+    <link rel="stylesheet" href="_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="_static/img/favicon.png">
+    <link rel="index" title="Index" href="genindex.html" >
+    <link rel="search" title="Search" href="search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="index.html" >
+    <link rel="next" title="To Do" href="todo.html" >
+    <link rel="prev" title="Core Principles" href="principles.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="index.html">QtBinder 0.3 documentation</a></li>
+	 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="todo.html" title="To Do"
+           accesskey="N">next</a>
+      </li>
+      <li class="active">
+        <a href="principles.html" title="Core Principles"
+           accesskey="P">previous</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="traits-ui-integration">
+<span id="traits-ui"></span><h1>Traits UI Integration<a class="headerlink" href="#traits-ui-integration" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> class is a Traits UI <code class="docutils literal notranslate"><span class="pre">Item</span></code> that can be used to place a <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+widget into a Traits UI <code class="docutils literal notranslate"><span class="pre">View</span></code> and bind it to traits on the model or <code class="docutils literal notranslate"><span class="pre">Handler</span></code>.
+It comes with its own <code class="docutils literal notranslate"><span class="pre">Editor</span></code> that knows how to set up the <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> and use it
+as the control for the <code class="docutils literal notranslate"><span class="pre">Item</span></code>.</p>
+<p>The <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> constructor takes a <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> instance and some bindings. Bindings
+are either instances of <a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> subclasses or, more conveniently,
+specially-formatted strings that will be parsed to <a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> subclass
+instances.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">traits_view</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span>
+    <span class="n">Bound</span><span class="p">(</span>
+        <span class="n">HBoxLayout</span><span class="p">(</span>
+            <span class="n">Label</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;label&#39;</span><span class="p">),</span>
+            <span class="n">LineEdit</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;An integer&#39;</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">Factory</span><span class="p">(</span><span class="s1">&#39;edit.validator&#39;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIntValidator</span><span class="p">),</span>
+        <span class="s1">&#39;label.text &lt;&lt; handler.label&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;edit.text := object.text&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;spacing = 5&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This example <code class="docutils literal notranslate"><span class="pre">View</span></code> succinctly demonstrates most of the Traits UI features. The
+<code class="docutils literal notranslate"><span class="pre">HBoxLayout</span></code> is a <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> that transparently wraps the <code class="docutils literal notranslate"><span class="pre">QHBoxLayout</span></code> Qt layout
+object. It is slightly customized with a constructor that lets you declare the
+child widgets by passing <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> objects. Thus you can build most typical
+layouts using a hierarchy of layout and widget <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> objects. <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+constructors can take an <code class="docutils literal notranslate"><span class="pre">id</span></code> keyword argument that sets a name for the
+<a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> that should be unique to the tree of <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> objects it is in. This
+name will be used to refer to that <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> in the bindings that follow. Other
+traits that proxy Qt properties can also be set in the <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> constructor.
+They will be assigned when the underlying <code class="docutils literal notranslate"><span class="pre">QObject</span></code> is assigned to the
+<a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>.</p>
+<p>Following the root <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> is a list of <a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> strings or objects. These
+follow a pattern of <code class="docutils literal notranslate"><span class="pre">'binder_trait</span> <span class="pre">&lt;operator&gt;</span> <span class="pre">model_trait_or_expression'</span></code>. On
+the left of the operator is either the name of a trait on the root <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+(e.g. <code class="docutils literal notranslate"><span class="pre">spacing</span></code> refers to the <code class="docutils literal notranslate"><span class="pre">HBoxLayout.spacing</span></code> property) or a dotted
+reference to a trait on a descendant <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> that has provided an explicit
+<code class="docutils literal notranslate"><span class="pre">id</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">edit.text</span></code> refers to the <code class="docutils literal notranslate"><span class="pre">LineEdit.text</span></code> property).</p>
+<p>On the right side of the operator is an expression evaluated in the Traits UI
+context. For a <a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> that writes back to the model (<code class="docutils literal notranslate"><span class="pre">:=</span></code>/<a class="reference internal" href="api/binding.html#qt_binder.binding.SyncedWith" title="qt_binder.binding.SyncedWith"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncedWith</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">&gt;&gt;</span></code>/<a class="reference internal" href="api/binding.html#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a>), this is restricted to a simple extended trait reference; i.e.
+<code class="docutils literal notranslate"><span class="pre">object.foo.bar</span></code> but not <code class="docutils literal notranslate"><span class="pre">object.foo.bar</span> <span class="pre">+</span> <span class="pre">10</span></code>. This context starts with the
+Traits UI context (i.e. has <code class="docutils literal notranslate"><span class="pre">object</span></code> and <code class="docutils literal notranslate"><span class="pre">handler</span></code> at a minimum) and is
+extended with any <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> in the tree with a non-empty <code class="docutils literal notranslate"><span class="pre">id</span></code>. For
+<code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code>/<a class="reference internal" href="api/binding.html#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a>, the expression will be parsed for extended trait references
+and the binding will be evaluated whenever it changes.
+For example, <code class="docutils literal notranslate"><span class="pre">format(handler.template,</span> <span class="pre">object.child.value)</span></code> will re-evaluate and
+assign to the left-hand side whenever <code class="docutils literal notranslate"><span class="pre">handler.template</span></code> OR
+<code class="docutils literal notranslate"><span class="pre">object.child.value</span></code> changes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Annoyingly, at the moment we cannot detect when such a dotted
+reference has a non-terminal non-<code class="docutils literal notranslate"><span class="pre">HasTraits</span></code> object. In the example above,
+<code class="docutils literal notranslate"><span class="pre">handler.template.format(object.child.value)</span></code> would cause an error because
+<code class="docutils literal notranslate"><span class="pre">handler.template</span></code> is a string, not a <code class="docutils literal notranslate"><span class="pre">HasTraits</span></code> object to which
+a listener can be attached.</p>
+</div>
+<p>There are four operators that can be used in the string representations of
+<a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> objects:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">=</span></code> or <a class="reference internal" href="api/binding.html#qt_binder.binding.SetOnceTo" title="qt_binder.binding.SetOnceTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SetOnceTo</span></code></a>: Set a value once. This evaluates the right-hand side once
+when the binding is established. No notifications will be sent afterwards.</li>
+<li><code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code> or <a class="reference internal" href="api/binding.html#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a>: Pull values from the model. This evaluates the
+right-hand side once when the binding is established and whenever any traits
+used in the expression fire a change notification.</li>
+<li><code class="docutils literal notranslate"><span class="pre">&gt;&gt;</span></code> or <a class="reference internal" href="api/binding.html#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a>: Push values from the <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> to the model. When the
+<a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> trait on the left-hand side changes, this will assign the new value
+to the attribute referenced on the right-hand side. No value is assigned on
+initialization.</li>
+<li><code class="docutils literal notranslate"><span class="pre">:=</span></code> or <a class="reference internal" href="api/binding.html#qt_binder.binding.SyncedWith" title="qt_binder.binding.SyncedWith"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncedWith</span></code></a>: A combination of <a class="reference internal" href="api/binding.html#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a> and <a class="reference internal" href="api/binding.html#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a> to
+synchronize a binder trait with a model trait. Because the right-hand side of
+<a class="reference internal" href="api/binding.html#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a> is restricted to plain attribute references, so is this. Like
+<a class="reference internal" href="api/binding.html#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a>, the right-hand side will be evaluated when the binding is
+established and assigned to the left-hand side to initialize it.</li>
+</ul>
+<p>And the last <a class="reference internal" href="api/binding.html#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a> cannot be put into string form:</p>
+<ul class="simple">
+<li><a class="reference internal" href="api/binding.html#qt_binder.binding.Factory" title="qt_binder.binding.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Factory</span></code></a>: Call the provided function once when the binding is established,
+and set the value. No notifications will be sent afterwards.</li>
+</ul>
+<p>Bindings which initialize a value (i.e. <a class="reference internal" href="api/binding.html#qt_binder.binding.SetOnceTo" title="qt_binder.binding.SetOnceTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SetOnceTo</span></code></a>/<code class="docutils literal notranslate"><span class="pre">=</span></code>, <a class="reference internal" href="api/binding.html#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a>/<code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span></code>,
+<a class="reference internal" href="api/binding.html#qt_binder.binding.SyncedWith" title="qt_binder.binding.SyncedWith"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncedWith</span></code></a>/<code class="docutils literal notranslate"><span class="pre">:=</span></code>, and <a class="reference internal" href="api/binding.html#qt_binder.binding.Factory" title="qt_binder.binding.Factory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Factory</span></code></a>) will be evaluated in the order in which they
+are specified. This can be important for initializing some Qt objects. For
+example, setting up validator properties before assigning the value.</p>
+<p><a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> takes the following optional keyword arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>label <span class="classifier-delimiter">:</span> <span class="classifier"><code class="docutils literal notranslate"><span class="pre">unicode</span></code></span></dt>
+<dd>Like the normal <code class="docutils literal notranslate"><span class="pre">Item</span></code> <code class="docutils literal notranslate"><span class="pre">label</span></code> argument, except that if one is not
+provided, then <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> will set <code class="docutils literal notranslate"><span class="pre">show_label=False</span></code>. Since the <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">Item</span></code> is not exclusively associated with any single trait like other Traits UI
+<code class="docutils literal notranslate"><span class="pre">Items</span></code> are, the default Traits UI behavior of using the trait name as
+a label is not useful.</dd>
+<dt>extra_context <span class="classifier-delimiter">:</span> <span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code></span></dt>
+<dd>Any extra objects that should be added to the context used to evaluate the
+right-hand-side of bindings.</dd>
+<dt>configure <span class="classifier-delimiter">:</span> <span class="classifier">function with signature <code class="docutils literal notranslate"><span class="pre">configure(binder,</span> <span class="pre">context)</span></code></span></dt>
+<dd>A function to call after the root <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> has been constructed and the
+bindings established but before display. It will be passed the root
+<a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> and the context dictionary. This can be used to do customizations
+using the raw Qt API that may not be achievable using bindings alone.</dd>
+<dt>stylesheet <span class="classifier-delimiter">:</span> <span class="classifier"><code class="docutils literal notranslate"><span class="pre">unicode</span></code></span></dt>
+<dd>A <a class="reference external" href="http://doc.qt.io/qt-4.8/stylesheet.html">Qt stylesheet</a>
+applied to the root control.</dd>
+<dt>button_groups <span class="classifier-delimiter">:</span> <span class="classifier"><code class="docutils literal notranslate"><span class="pre">dict</span></code> naming <a class="reference internal" href="api/raw_widgets.html#qt_binder.raw_widgets.ButtonGroup" title="qt_binder.raw_widgets.ButtonGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ButtonGroup</span></code></a> objects</span></dt>
+<dd>Collect buttons in the UI into named, bindable groups that will be
+added to the context.</dd>
+</dl>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="principles.html"
+                        title="previous chapter">Core Principles</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="todo.html"
+                        title="next chapter">To Do</a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="_sources/traits_ui.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

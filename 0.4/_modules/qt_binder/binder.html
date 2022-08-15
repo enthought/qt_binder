@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.binder &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../../genindex.html" >
+    <link rel="search" title="Search" href="../../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../../index.html" >
+    <link rel="up" title="Module code" href="../index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="../index.html" accesskey="U">Module code</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <h1>Source code for qt_binder.binder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># (C) Copyright 2014-2022 Enthought, Inc., Austin, TX</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is provided without warranty under the terms of the BSD</span>
+<span class="c1"># license included in LICENSE.txt and may be redistributed only under</span>
+<span class="c1"># the conditions described in the aforementioned license. The license</span>
+<span class="c1"># is also available online at http://www.enthought.com/licenses/BSD.txt</span>
+<span class="c1">#</span>
+<span class="c1"># Thanks for using Enthought open source!</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">keyword</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="kn">import</span> <span class="n">HasStrictTraits</span><span class="p">,</span> <span class="n">Instance</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Property</span><span class="p">,</span> <span class="n">Str</span><span class="p">,</span> \
+    <span class="n">TraitType</span><span class="p">,</span> <span class="n">Undefined</span>
+
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">DELAYED_CONNECTION</span><span class="p">,</span> <span class="n">DELAYED_SETATTR</span><span class="p">,</span> \
+    <span class="n">EXISTING_INSTANCE_TRAIT</span><span class="p">,</span> <span class="n">EXISTING_NOTIFIERS</span><span class="p">,</span> <span class="n">FORCE_INSTANCE_TRAIT</span><span class="p">,</span> \
+    <span class="n">FORCE_NOTIFIERS</span>
+<span class="kn">from</span> <span class="nn">.loopback_guard</span> <span class="kn">import</span> <span class="n">LoopbackGuard</span>
+<span class="kn">from</span> <span class="nn">.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">qt_api</span>
+
+
+<span class="n">NULL_VARIANT_VALUES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;QString&#39;</span><span class="p">:</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_to_str</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QByteArray</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">data</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span>
+
+
+<span class="k">def</span> <span class="nf">_slot_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">_property_changed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_slot_for</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">slot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">ref</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">trait_property_changed</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="n">slot</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">_slot_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">slot</span>
+
+
+<span class="k">def</span> <span class="nf">_guard_against_null_variant</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert PyQt4&#39;s QPyNullVariant to a reasonable value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;QPyNullVariant&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">NULL_VARIANT_VALUES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">typeName</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_python_name_for_qt_name</span><span class="p">(</span><span class="n">qname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert forbidden Qt names to valid Python names, following PySide/PyQt</span>
+<span class="sd">    rules.</span>
+
+<span class="sd">    E.g. &#39;raise&#39; -&gt; &#39;raise_&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">qname</span><span class="p">):</span>
+        <span class="n">qname</span> <span class="o">+=</span> <span class="s1">&#39;_&#39;</span>
+    <span class="k">return</span> <span class="n">qname</span>
+
+
+<span class="k">def</span> <span class="nf">_get_signature</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Robustly find the signature of a ``QMetaMethod``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">,</span> <span class="s1">&#39;methodSignature&#39;</span><span class="p">):</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">meta_meth</span><span class="o">.</span><span class="n">methodSignature</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">meta_meth</span><span class="o">.</span><span class="n">signature</span><span class="p">()</span>
+    <span class="n">signature</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">signature</span>
+
+
+<span class="k">def</span> <span class="nf">_qt_name_for_meta_method</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get the Qt name for a ``QMetaMethod``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_get_signature</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_setter_name</span><span class="p">(</span><span class="n">getter_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a getter name to a setter name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;set&#39;</span> <span class="o">+</span> <span class="n">getter_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">getter_name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+
+<div class="viewcode-block" id="QtTrait"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtTrait">[docs]</a><span class="k">class</span> <span class="nc">QtTrait</span><span class="p">(</span><span class="n">TraitType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for Qt proxy traits on :class:`~.Binder` classes.</span>
+
+<span class="sd">    Each subclass should override :meth:`get` and :meth:`set`. All</span>
+<span class="sd">    :class:`~.QtTrait` subclasses are property-like traits.</span>
+
+<span class="sd">    If there is a Qt ``Signal`` that should be connected to to propagate</span>
+<span class="sd">    notifications, set ``is_signal`` to ``True`` and provide a ``qname`` (the</span>
+<span class="sd">    Qt name for the signal) and ``meta_method`` (the ``QMetaMethod`` for the</span>
+<span class="sd">    signal). The Qt ``Signal`` will only be connected to when a Traits listener</span>
+<span class="sd">    is attached to this trait.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">transient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QtTrait.get"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtTrait.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the value of this trait.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="QtTrait.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtTrait.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the value of this trait and notify listeners.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="QtTrait.connect_signal"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtTrait.connect_signal">[docs]</a>    <span class="k">def</span> <span class="nf">connect_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Connect to the Qt signal, if any.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span><span class="p">:</span>
+            <span class="c1"># No signal to connect to.</span>
+            <span class="k">return</span>
+        <span class="n">slot</span> <span class="o">=</span> <span class="n">_slot_for</span><span class="p">(</span><span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">slot</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">slot</span>
+        <span class="c1"># Get the bound signal from the QObject.</span>
+        <span class="n">signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_signal</span><span class="p">(</span><span class="nb">object</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="n">signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QtTrait.disconnect_signal"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtTrait.disconnect_signal">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Disconnect from the Qt signal, if any.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span><span class="p">:</span>
+            <span class="c1"># No signal to disconnect from.</span>
+            <span class="k">return</span>
+        <span class="n">slot_name</span> <span class="o">=</span> <span class="n">_slot_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">slot</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">slot_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">slot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_signal</span><span class="p">(</span><span class="nb">object</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="c1"># FIXME: PySide2 will raise a RuntimeError here, but it will</span>
+            <span class="c1"># disconnect the signal. Not sure if there are other problems.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">signal</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">qt_api</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;pyside2&#39;</span><span class="p">,</span> <span class="s1">&#39;pyside6&#39;</span><span class="p">):</span>
+                    <span class="k">raise</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qobj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the correct bound signal, especially when overloaded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Only call this when we are a signal.</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span>
+        <span class="c1"># The subclass must provide these when is_signal is True</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;qname&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;meta_method&#39;</span><span class="p">)</span>
+        <span class="n">arg_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">_to_str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_method</span><span class="o">.</span><span class="n">parameterTypes</span><span class="p">()]</span>
+        <span class="n">signal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qname</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">signal</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">signal</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">arg_types</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="QtProperty"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtProperty">[docs]</a><span class="k">class</span> <span class="nc">QtProperty</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Proxy trait for a Qt static property.</span>
+
+<span class="sd">    Pass in a ``QMetaProperty`` from the ``QMetaObject``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_prop</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtProperty</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span> <span class="o">=</span> <span class="n">meta_prop</span>
+        <span class="k">if</span> <span class="n">meta_prop</span><span class="o">.</span><span class="n">hasNotifySignal</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">notifySignal</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qname</span> <span class="o">=</span> <span class="n">_qt_name_for_meta_method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_method</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="QtProperty.get"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtProperty.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the value of this trait.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Property </span><span class="si">{0!r}</span><span class="s2"> not available until Binder is given &quot;</span>
+                       <span class="s2">&quot;its QObject.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="c1"># PyQt4 will sometimes return a QPyNullVariant via this API even if it</span>
+        <span class="c1"># converts it to the correct null value for the type for the property</span>
+        <span class="c1"># attribute on the QObject itself.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">_guard_against_null_variant</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="QtProperty.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtProperty.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the value of this trait and notify listeners.</span>
+
+<span class="sd">        If there is a Qt ``Signal`` for this property, it will notify the</span>
+<span class="sd">        listeners. If there is not one for this property, this method will</span>
+<span class="sd">        explicitly send a notification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+        <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qt_api</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pyside&#39;</span><span class="p">):</span>
+            <span class="c1"># PySide2 has a bug such that it will not set flags properly</span>
+            <span class="c1"># through the QMetaProperty mechanism, like for</span>
+            <span class="c1"># QGroupBox.alignment.  Use names instead.</span>
+            <span class="n">qname</span> <span class="o">=</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">name</span><span class="p">()))</span>
+            <span class="c1"># The setter is pretty reliably named like this. The getter is</span>
+            <span class="c1"># sometimes not (e.g. isEditable() instead of editable()), so we</span>
+            <span class="c1"># continue to use the QMetaProperty.read() mechanism for that,</span>
+            <span class="c1"># which seems reliable in PySide2.</span>
+            <span class="n">setter</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_setter_name</span><span class="p">(</span><span class="n">qname</span><span class="p">))</span>
+            <span class="n">setter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span><span class="p">:</span>
+            <span class="c1"># Propagate the event notification ourselves.</span>
+            <span class="nb">object</span><span class="o">.</span><span class="n">trait_property_changed</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="QtDynamicProperty"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtDynamicProperty">[docs]</a><span class="k">class</span> <span class="nc">QtDynamicProperty</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A Qt dynamic property added to the ``QObject``.</span>
+
+<span class="sd">    The dynamic property will be created on the ``QObject`` when it is</span>
+<span class="sd">    added to the :class:`~.Binder`. The default value given to this trait will</span>
+<span class="sd">    be the initial value. It should be an object that can be passed to</span>
+<span class="sd">    ``QVariant``.</span>
+
+<span class="sd">    Because most dynamic properties will be added this way to support Qt</span>
+<span class="sd">    stylesheets, by default when the property is assigned a new value, the</span>
+<span class="sd">    ``QObject`` associated with the ``Binder`` (which should be a ``QWidget``)</span>
+<span class="sd">    will be made to redraw itself in order to reevaluate the stylesheet rules</span>
+<span class="sd">    with the new value. Turn this off by passing ``styled=False`` to the</span>
+<span class="sd">    constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;is_dynamic_property&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;styled&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtDynamicProperty</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">default_value</span><span class="o">=</span><span class="n">default_value</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QtDynamicProperty.get"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtDynamicProperty.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the value of this trait.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">delayed_attrs</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">return</span> <span class="n">delayed_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qobj</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QtDynamicProperty.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtDynamicProperty.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the value of this trait and notify listeners.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+        <span class="n">old</span> <span class="o">=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">qobj</span><span class="o">.</span><span class="n">setProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;styled&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">):</span>
+            <span class="n">style</span> <span class="o">=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">style</span><span class="p">()</span>
+            <span class="n">style</span><span class="o">.</span><span class="n">unpolish</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="n">style</span><span class="o">.</span><span class="n">polish</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="n">trait_property_changed</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="QtGetterSetter"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtGetterSetter">[docs]</a><span class="k">class</span> <span class="nc">QtGetterSetter</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Proxy for a getter/setter pair of methods.</span>
+
+<span class="sd">    This is used for ``value()/setValue()`` pairs of methods that are</span>
+<span class="sd">    frequently found in Qt, but which are not bona fide Qt properties.</span>
+
+<span class="sd">    If the names follow this convention, you only need to pass the name of the</span>
+<span class="sd">    getter method. Otherwise, pass both.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getter_name</span><span class="p">,</span> <span class="n">setter_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtGetterSetter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getter_name</span> <span class="o">=</span> <span class="n">getter_name</span>
+        <span class="k">if</span> <span class="n">setter_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">setter_name</span> <span class="o">=</span> <span class="n">_setter_name</span><span class="p">(</span><span class="n">getter_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setter_name</span> <span class="o">=</span> <span class="n">setter_name</span>
+
+<div class="viewcode-block" id="QtGetterSetter.get"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtGetterSetter.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the value of this trait.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Getter </span><span class="si">{0!r}</span><span class="s2"> not available until Binder is given &quot;</span>
+                       <span class="s2">&quot;its QObject.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getter_name</span><span class="p">))()</span></div>
+
+<div class="viewcode-block" id="QtGetterSetter.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtGetterSetter.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the value of this trait and notify listeners.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+        <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setter_name</span><span class="p">))(</span><span class="n">value</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="n">trait_property_changed</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="QtSlot"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtSlot">[docs]</a><span class="k">class</span> <span class="nc">QtSlot</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Proxy for a Qt slot method.</span>
+
+<span class="sd">    In general use, this trait will only be assigned to. If the slot takes no</span>
+<span class="sd">    arguments, the value assigned is ignored. If the slot takes one argument,</span>
+<span class="sd">    the value assigned is passed to the slot. If the slot takes more than one</span>
+<span class="sd">    argument, the value assigned should be a tuple of the right size.</span>
+
+<span class="sd">    As a convenience, getting the value of this trait will return the slot</span>
+<span class="sd">    method object itself to allow you to connect to it using the normal Qt</span>
+<span class="sd">    mechanism.</span>
+
+<span class="sd">    The constructor should be passed the ``QMetaMethod`` for this slot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_method</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtSlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_method</span> <span class="o">=</span> <span class="n">meta_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qname</span> <span class="o">=</span> <span class="n">_qt_name_for_meta_method</span><span class="p">(</span><span class="n">meta_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_method</span><span class="o">.</span><span class="n">parameterTypes</span><span class="p">())</span>
+
+<div class="viewcode-block" id="QtSlot.get"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtSlot.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the underlying method object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">object</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qname</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="QtSlot.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtSlot.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the value of this trait.</span>
+
+<span class="sd">        See :class:`~.QtSlot` for details on how the value is processed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_args</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">qobj</span><span class="p">,</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qname</span><span class="p">))(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_process_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_args</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># The value is ignored. Setting any value counts as just calling</span>
+            <span class="c1"># the empty slot.</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">args</span></div>
+
+
+<div class="viewcode-block" id="QtSignal"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtSignal">[docs]</a><span class="k">class</span> <span class="nc">QtSignal</span><span class="p">(</span><span class="n">QtSlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Proxy for a Qt signal method.</span>
+
+<span class="sd">    In general use, this trait will only be listened to for events that are</span>
+<span class="sd">    emitted internally from Qt. However, it can be assigned values, with the</span>
+<span class="sd">    same argument semantics as :class:`~.QtSlot`. Like :class:`~.QtSlot`,</span>
+<span class="sd">    getting the value of this trait will return the signal method object itself</span>
+<span class="sd">    for you to connect to it using the normal Qt mechanism.</span>
+
+<span class="sd">    The constructor should be passed the ``QMetaMethod`` for this signal.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_method</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QtSignal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">meta_method</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_signal</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="QtSignal.set"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.QtSignal.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Emit the signal with the given value.</span>
+
+<span class="sd">        See :class:`~.QtSlot` for details on how the value is processed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_args</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Use the QMetaMethod to invoke the signal for PyQt4 compatibility.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta_method</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># In both PyQt4 and PySide, QMetaMethod.invoke() does not</span>
+            <span class="c1"># automatically convert the arguments, so emit it directly.</span>
+            <span class="n">signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_signal</span><span class="p">(</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Rename"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Rename">[docs]</a><span class="k">class</span> <span class="nc">Rename</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Specify that an automatic QtTrait be renamed.</span>
+
+<span class="sd">    Use at the class level of a :class:`~.Binder` to rename the trait to</span>
+<span class="sd">    something else.</span>
+
+<span class="sd">    For :class:`~.QtSlot` traits with multiple signatures, only the primary</span>
+<span class="sd">    part of the name (without the mangled type signature) needs to be given.</span>
+
+<span class="sd">    Since one cannot use both a :class:`~.Default` and :class:`~.Rename` at the</span>
+<span class="sd">    same time, one can also specify the default value here.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qt_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Undefined</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Rename an automatic QtTrait.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qt_name : str</span>
+<span class="sd">            The name of the Qt property/signal/slot being renamed.</span>
+<span class="sd">        default : object, optional</span>
+<span class="sd">            The default value, if any.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qt_name</span> <span class="o">=</span> <span class="n">qt_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">default</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Undefined</span><span class="p">:</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="s1">&#39;, </span><span class="si">{0.default!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1.qt_name!r}{2}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">extra</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Default"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Default">[docs]</a><span class="k">class</span> <span class="nc">Default</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Specify a default value for an automatic QtTrait.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1.value!r}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Binder"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Binder">[docs]</a><span class="k">class</span> <span class="nc">Binder</span><span class="p">(</span><span class="n">HasStrictTraits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Traited proxy for a ``QObject`` class.</span>
+
+<span class="sd">    The default proxy traits will be automatically assigned by inspecting the</span>
+<span class="sd">    Qt class specified in the :attr:`qclass` class attribute. Since this</span>
+<span class="sd">    inspection process can be time consuming, compared to normal class</span>
+<span class="sd">    construction, this will only be done the first time the ``Binder`` class is</span>
+<span class="sd">    instantiated.</span>
+
+<span class="sd">    For those traits that proxy a Qt ``Signal`` (or property that has</span>
+<span class="sd">    a ``Signal``), the Qt signal connection will only be made once a **Traits**</span>
+<span class="sd">    listener is attached to the proxy trait.</span>
+
+<span class="sd">    The :attr:`qobj` can only be assigned once in the ``Binder&#39;s`` lifetime.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The ``QObject`` **class** that is going to be wrapped by this class.</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span>
+
+    <span class="c1">#: The Qt object instance that is wrapped by the :class:`~.Binder`</span>
+    <span class="c1">#: instance.</span>
+    <span class="n">qobj</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">)</span>
+
+    <span class="c1">#: The loopback guard.</span>
+    <span class="n">loopback_guard</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">LoopbackGuard</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">())</span>
+
+    <span class="c1">#: An ID string, if any. It should be a valid Python identifier.</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Str</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_binder_class</span><span class="p">()</span>
+        <span class="c1"># HasStrictTraits.__init__ doesn&#39;t take *args.</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Binder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Binder.construct"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Binder.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Default constructor that will automatically instantiate ``qclass``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qclass</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Binder.configure"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Binder.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Do any configuration of the ``qobj`` that is needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Binder.dispose"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Binder.dispose">[docs]</a>    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove any connections and otherwise clean up for disposal.</span>
+
+<span class="sd">        This does not mark any Qt objects for deletion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Remove all signal connections.</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ctrait</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traits</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">ctrait</span><span class="o">.</span><span class="n">is_trait_type</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+                <span class="n">ctrait</span><span class="o">.</span><span class="n">trait_type</span><span class="o">.</span><span class="n">disconnect_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="c1">#### Private protocol #####################################################</span>
+
+    <span class="k">def</span> <span class="nf">_on_trait_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">dispatch</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Causes the object to invoke a handler whenever a trait attribute</span>
+<span class="sd">        is modified, or removes the association.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_this_after</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">n_notifiers_before</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;anytrait&#39;</span><span class="p">:</span>
+            <span class="c1"># This was attaching a handler to a single trait.</span>
+            <span class="n">force_trait</span> <span class="o">=</span> <span class="p">(</span><span class="n">FORCE_INSTANCE_TRAIT</span><span class="p">,</span>
+                           <span class="n">EXISTING_INSTANCE_TRAIT</span><span class="p">)[</span><span class="n">remove</span><span class="p">]</span>
+            <span class="n">force_notifiers</span> <span class="o">=</span> <span class="p">(</span><span class="n">FORCE_NOTIFIERS</span><span class="p">,</span>
+                               <span class="n">EXISTING_NOTIFIERS</span><span class="p">)[</span><span class="n">remove</span><span class="p">]</span>
+            <span class="n">ctrait</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trait</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">force_trait</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ctrait</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ctrait</span><span class="o">.</span><span class="n">is_trait_type</span><span class="p">(</span><span class="n">QtTrait</span><span class="p">):</span>
+                    <span class="n">check_this_after</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">notifiers</span> <span class="o">=</span> <span class="n">ctrait</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">(</span><span class="n">force_notifiers</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">notifiers</span><span class="p">:</span>
+                        <span class="n">n_notifiers_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">notifiers</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Binder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_on_trait_change</span><span class="p">(</span>
+            <span class="n">handler</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="n">remove</span><span class="p">,</span> <span class="n">dispatch</span><span class="o">=</span><span class="n">dispatch</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check_this_after</span><span class="p">:</span>
+            <span class="n">notifiers</span> <span class="o">=</span> <span class="n">ctrait</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">(</span><span class="n">force_notifiers</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">notifiers</span><span class="p">:</span>
+                <span class="n">n_notifiers_after</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">notifiers</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n_notifiers_after</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">connectors</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">n_notifiers_before</span> <span class="ow">and</span> <span class="n">n_notifiers_after</span><span class="p">:</span>
+                <span class="n">connectors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ctrait</span><span class="o">.</span><span class="n">trait_type</span><span class="o">.</span><span class="n">connect_signal</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">n_notifiers_before</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">n_notifiers_after</span><span class="p">:</span>
+                <span class="n">connectors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ctrait</span><span class="o">.</span><span class="n">trait_type</span><span class="o">.</span><span class="n">disconnect_signal</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;qobj&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># No Qt object yet. Delay the connection.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">DELAYED_CONNECTION</span><span class="p">,</span> <span class="n">deque</span><span class="p">())</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">connectors</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">connectors</span><span class="p">:</span>
+                    <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_collect_renamings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binder_class</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Collect all of the renamings requested by Rename traits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">renamings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Find all requested renamings.</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">binder_class</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binder_class</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Rename</span><span class="p">):</span>
+                <span class="n">renamings</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">qt_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">renamings</span>
+
+    <span class="k">def</span> <span class="nf">_add_qt_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add QtProperties.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">meta_object</span> <span class="o">=</span> <span class="n">binder_class</span><span class="o">.</span><span class="n">qclass</span><span class="o">.</span><span class="n">staticMetaObject</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">meta_object</span><span class="o">.</span><span class="n">propertyCount</span><span class="p">()):</span>
+            <span class="n">meta_prop</span> <span class="o">=</span> <span class="n">meta_object</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">qname</span> <span class="o">=</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span><span class="n">meta_prop</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">renamings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qname</span><span class="p">,</span> <span class="n">qname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+                    <span class="c1"># See #21</span>
+                    <span class="k">continue</span>
+                <span class="n">binder_class</span><span class="o">.</span><span class="n">add_class_trait</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">QtProperty</span><span class="p">(</span><span class="n">meta_prop</span><span class="p">))</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_qt_signals_slots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add QtSignals and QtSlots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">meta_object</span> <span class="o">=</span> <span class="n">binder_class</span><span class="o">.</span><span class="n">qclass</span><span class="o">.</span><span class="n">staticMetaObject</span>
+        <span class="n">overloads</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">meta_object</span><span class="o">.</span><span class="n">methodCount</span><span class="p">()):</span>
+            <span class="n">meta_meth</span> <span class="o">=</span> <span class="n">meta_object</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">qname</span> <span class="o">=</span> <span class="n">_python_name_for_qt_name</span><span class="p">(</span>
+                <span class="n">_qt_name_for_meta_method</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">renamings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qname</span><span class="p">,</span> <span class="n">qname</span><span class="p">)</span>
+            <span class="n">overloads</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">methods</span> <span class="ow">in</span> <span class="n">overloads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">method_type</span> <span class="o">=</span> <span class="n">methods</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">methodType</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">method_type</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMetaMethod</span><span class="o">.</span><span class="n">Slot</span><span class="p">:</span>
+                <span class="n">trait_type</span> <span class="o">=</span> <span class="n">QtSlot</span>
+            <span class="k">elif</span> <span class="n">method_type</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMetaMethod</span><span class="o">.</span><span class="n">Signal</span><span class="p">:</span>
+                <span class="n">trait_type</span> <span class="o">=</span> <span class="n">QtSignal</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># In the case of overloads, always register the first one</span>
+            <span class="c1"># unqualified. This is largely to support across the gap between</span>
+            <span class="c1"># Qt4 and Qt6 where some slots lost their overloads.</span>
+            <span class="c1"># C.f. QComboBox.currentIndexChanged()</span>
+            <span class="n">meta_meth</span> <span class="o">=</span> <span class="n">methods</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+                    <span class="c1"># See #21</span>
+                    <span class="k">continue</span>
+                <span class="n">trait</span> <span class="o">=</span> <span class="n">trait_type</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">)</span>
+                <span class="n">binder_class</span><span class="o">.</span><span class="n">add_class_trait</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">trait</span><span class="p">)</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># If there are overloads, qualify the name with the types to</span>
+            <span class="c1"># provide disambiguation.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">methods</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">meta_meth</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+                    <span class="c1"># Add the argument types to the name to disambiguate</span>
+                    <span class="n">arg_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">_to_str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+                                 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">meta_meth</span><span class="o">.</span><span class="n">parameterTypes</span><span class="p">()]</span>
+                    <span class="n">qualname</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="n">arg_types</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">qualname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">qualname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+                            <span class="c1"># See #21</span>
+                            <span class="k">continue</span>
+                        <span class="n">trait</span> <span class="o">=</span> <span class="n">trait_type</span><span class="p">(</span><span class="n">meta_meth</span><span class="p">)</span>
+                        <span class="n">binder_class</span><span class="o">.</span><span class="n">add_class_trait</span><span class="p">(</span><span class="n">qualname</span><span class="p">,</span> <span class="n">trait</span><span class="p">)</span>
+                        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">qualname</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_implied_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add properties defined by pairs of getters and setters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Add all getter/setter pairs that we can identify.</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># Use getmembers() to collect inherited methods from ancestor classes,</span>
+        <span class="c1"># too.</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">binder_class</span><span class="o">.</span><span class="n">qclass</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">class_attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binder_class</span><span class="o">.</span><span class="n">qclass</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="c1"># sip methoddescriptor objects do not have __call__() defined.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">callable</span><span class="p">(</span><span class="n">class_attr</span><span class="p">)</span> <span class="ow">or</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">class_attr</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;methoddescriptor&#39;</span><span class="p">):</span>
+                    <span class="n">methods</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">qname</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+            <span class="c1"># FIXME: We do not know if these are true getter/setters, where</span>
+            <span class="c1"># the getter has 0 arguments and the setter has just the 1. For</span>
+            <span class="c1"># example, `QObject.property(name)` and</span>
+            <span class="c1"># `QObject.setProperty(name, value)` get misidentified here.</span>
+            <span class="c1"># Unfortunately, the method objects do not have any information</span>
+            <span class="c1"># about their argument structure.</span>
+            <span class="k">if</span> <span class="n">qname</span> <span class="o">==</span> <span class="s1">&#39;property&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">putative_setter</span> <span class="o">=</span> <span class="n">_setter_name</span><span class="p">(</span><span class="n">qname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">putative_setter</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">renamings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qname</span><span class="p">,</span> <span class="n">qname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+                    <span class="c1"># See #21</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="c1"># We&#39;ve done this pair earlier, probably through the</span>
+                    <span class="c1"># QMetaProperty mechanism, so we can ignore it here.</span>
+                    <span class="k">continue</span>
+                <span class="n">binder_class</span><span class="o">.</span><span class="n">add_class_trait</span><span class="p">(</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">QtGetterSetter</span><span class="p">(</span><span class="n">qname</span><span class="p">,</span> <span class="n">putative_setter</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_binder_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Ensure that the binder class has been initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">binder_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="n">initialized_name</span> <span class="o">=</span> <span class="s1">&#39;_</span><span class="si">{0.__name__}</span><span class="s1">__binder_class_initialized&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">binder_class</span><span class="p">)</span>
+        <span class="c1"># Look directly at the __dict__. Even with the name disambiguation, we</span>
+        <span class="c1"># still only want to look directly at this class, not its superclasses.</span>
+        <span class="n">initialized</span> <span class="o">=</span> <span class="n">binder_class</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">initialized_name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initialized</span><span class="p">:</span>
+            <span class="n">renamings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_renamings</span><span class="p">(</span><span class="n">binder_class</span><span class="p">)</span>
+            <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">binder_class</span><span class="o">.</span><span class="n">class_trait_names</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_qt_properties</span><span class="p">(</span><span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_qt_signals_slots</span><span class="p">(</span><span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_implied_properties</span><span class="p">(</span><span class="n">binder_class</span><span class="p">,</span> <span class="n">renamings</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">binder_class</span><span class="p">,</span> <span class="n">initialized_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_qobj_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Hook up any delayed connections to the new ``qobj``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">old</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;A Binder should only have one QObject per &quot;</span>
+                             <span class="s2">&quot;lifetime&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="c1"># Hook up any delayed connections causd by Traits listeners that were</span>
+        <span class="c1"># attached before we had a `qobj`.</span>
+        <span class="k">if</span> <span class="n">DELAYED_CONNECTION</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="n">delayed_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">DELAYED_CONNECTION</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">delayed_connections</span><span class="p">:</span>
+                <span class="n">func</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">delayed_connections</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="c1"># Create and initialized any Qt dynamic properties that have been</span>
+        <span class="c1"># requested.</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ctrait</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traits</span><span class="p">(</span><span class="n">is_dynamic_property</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctrait</span><span class="o">.</span><span class="n">trait_type</span><span class="o">.</span><span class="n">get_default_value</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># And any explicit Defaults.</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Default</span><span class="p">):</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Rename</span><span class="p">)</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Undefined</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">default</span>
+        <span class="c1"># And any delayed setattrs.</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">DELAYED_SETATTR</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span><span class="o">**</span><span class="n">values</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Composite"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Composite">[docs]</a><span class="k">class</span> <span class="nc">Composite</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for Binders that hold other Binders as children.</span>
+
+<span class="sd">    Their ``QObjects`` may or may not have a similar parent-child relationship.</span>
+<span class="sd">    The ``Composite`` is responsible for constructing its children, configuring</span>
+<span class="sd">    them, and disposing of them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The child ``Binder`` instances. This will typically be a Property</span>
+    <span class="c1">#: returning a list of ``Binders`` that are attributes.</span>
+    <span class="n">child_binders</span> <span class="o">=</span> <span class="n">Property</span><span class="p">(</span><span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="Composite.configure"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Composite.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Do any configuration of the ``qobj`` that is needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Composite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Composite.dispose"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.Composite.dispose">[docs]</a>    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove any connections and otherwise clean up for disposal.</span>
+
+<span class="sd">        This does not mark any Qt objects for deletion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Composite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">child</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">_get_child_binders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Default implementation yielding all of the attributes on this</span>
+<span class="sd">        object that are ``Binders``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                <span class="c1"># FIXME: uniquify</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">children</span></div>
+
+
+<div class="viewcode-block" id="NChildren"><a class="viewcode-back" href="../../api/binder.html#qt_binder.binder.NChildren">[docs]</a><span class="k">class</span> <span class="nc">NChildren</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for Composite Binders that have arbitrary unnamed children.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Any children. It will be filtered for Binders.</span>
+    <span class="n">child_binders</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="s1">&#39;, id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

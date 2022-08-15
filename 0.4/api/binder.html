@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.binder &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../genindex.html" >
+    <link rel="search" title="Search" href="../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../index.html" >
+    <link rel="up" title="API Reference" href="index.html" >
+    <link rel="next" title="qt_binder.binding" href="binding.html" >
+    <link rel="prev" title="API Reference" href="index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="index.html" accesskey="U">API Reference</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="binding.html" title="qt_binder.binding"
+           accesskey="N">next</a>
+      </li>
+      <li class="active">
+        <a href="index.html" title="API Reference"
+           accesskey="P">previous</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="qt-binder-binder">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">qt_binder.binder</span></code><a class="headerlink" href="#qt-binder-binder" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qt_binder.binder.Binder">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">Binder</code><span class="sig-paren">(</span><em>*args</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Binder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Binder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://traits.readthedocs.io/en/latest/traits_api_reference/has_traits.html#traits.has_traits.HasStrictTraits" title="(in traits v7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">traits.has_traits.HasStrictTraits</span></code></a></p>
+<p>Traited proxy for a <code class="docutils literal notranslate"><span class="pre">QObject</span></code> class.</p>
+<p>The default proxy traits will be automatically assigned by inspecting the
+Qt class specified in the <a class="reference internal" href="#qt_binder.binder.Binder.qclass" title="qt_binder.binder.Binder.qclass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">qclass</span></code></a> class attribute. Since this
+inspection process can be time consuming, compared to normal class
+construction, this will only be done the first time the <code class="docutils literal notranslate"><span class="pre">Binder</span></code> class is
+instantiated.</p>
+<p>For those traits that proxy a Qt <code class="docutils literal notranslate"><span class="pre">Signal</span></code> (or property that has
+a <code class="docutils literal notranslate"><span class="pre">Signal</span></code>), the Qt signal connection will only be made once a <strong>Traits</strong>
+listener is attached to the proxy trait.</p>
+<p>The <a class="reference internal" href="#qt_binder.binder.Binder.qobj" title="qt_binder.binder.Binder.qobj"><code class="xref py py-attr docutils literal notranslate"><span class="pre">qobj</span></code></a> can only be assigned once in the <code class="docutils literal notranslate"><span class="pre">Binder's</span></code> lifetime.</p>
+<dl class="attribute">
+<dt id="qt_binder.binder.Binder.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.binder.Binder.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtCore.QObject</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.binder.Binder.qobj">
+<code class="descname">qobj</code><em class="property"> = Instance(QtCore.QObject)</em><a class="headerlink" href="#qt_binder.binder.Binder.qobj" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Qt object instance that is wrapped by the <a class="reference internal" href="#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.binder.Binder.loopback_guard">
+<code class="descname">loopback_guard</code><em class="property"> = Instance(LoopbackGuard, args=())</em><a class="headerlink" href="#qt_binder.binder.Binder.loopback_guard" title="Permalink to this definition">¶</a></dt>
+<dd><p>The loopback guard.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.binder.Binder.id">
+<code class="descname">id</code><em class="property"> = Str()</em><a class="headerlink" href="#qt_binder.binder.Binder.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ID string, if any. It should be a valid Python identifier.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.Binder.construct">
+<code class="descname">construct</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Binder.construct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Binder.construct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default constructor that will automatically instantiate <code class="docutils literal notranslate"><span class="pre">qclass</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.Binder.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Binder.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Binder.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.Binder.dispose">
+<code class="descname">dispose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Binder.dispose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Binder.dispose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any connections and otherwise clean up for disposal.</p>
+<p>This does not mark any Qt objects for deletion.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.Composite">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">Composite</code><span class="sig-paren">(</span><em>*args</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Composite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Composite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.Binder</span></code></a></p>
+<p>Base class for Binders that hold other Binders as children.</p>
+<p>Their <code class="docutils literal notranslate"><span class="pre">QObjects</span></code> may or may not have a similar parent-child relationship.
+The <code class="docutils literal notranslate"><span class="pre">Composite</span></code> is responsible for constructing its children, configuring
+them, and disposing of them.</p>
+<dl class="attribute">
+<dt id="qt_binder.binder.Composite.child_binders">
+<code class="descname">child_binders</code><em class="property"> = Property(List(Instance(Binder)))</em><a class="headerlink" href="#qt_binder.binder.Composite.child_binders" title="Permalink to this definition">¶</a></dt>
+<dd><p>The child <code class="docutils literal notranslate"><span class="pre">Binder</span></code> instances. This will typically be a Property
+returning a list of <code class="docutils literal notranslate"><span class="pre">Binders</span></code> that are attributes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.Composite.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Composite.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Composite.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.Composite.dispose">
+<code class="descname">dispose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Composite.dispose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Composite.dispose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any connections and otherwise clean up for disposal.</p>
+<p>This does not mark any Qt objects for deletion.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.NChildren">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">NChildren</code><span class="sig-paren">(</span><em>*args</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#NChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.NChildren" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.Composite" title="qt_binder.binder.Composite"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.Composite</span></code></a></p>
+<p>Base class for Composite Binders that have arbitrary unnamed children.</p>
+<dl class="attribute">
+<dt id="qt_binder.binder.NChildren.child_binders">
+<code class="descname">child_binders</code><em class="property"> = List(Instance(Binder))</em><a class="headerlink" href="#qt_binder.binder.NChildren.child_binders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Any children. It will be filtered for Binders.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtTrait">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtTrait</code><span class="sig-paren">(</span><em>*args</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtTrait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtTrait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://traits.readthedocs.io/en/latest/traits_api_reference/trait_type.html#traits.trait_type.TraitType" title="(in traits v7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">traits.trait_type.TraitType</span></code></a></p>
+<p>Base class for Qt proxy traits on <a class="reference internal" href="#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> classes.</p>
+<p>Each subclass should override <a class="reference internal" href="#qt_binder.binder.QtTrait.get" title="qt_binder.binder.QtTrait.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> and <a class="reference internal" href="#qt_binder.binder.QtTrait.set" title="qt_binder.binder.QtTrait.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set()</span></code></a>. All
+<a class="reference internal" href="#qt_binder.binder.QtTrait" title="qt_binder.binder.QtTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtTrait</span></code></a> subclasses are property-like traits.</p>
+<p>If there is a Qt <code class="docutils literal notranslate"><span class="pre">Signal</span></code> that should be connected to to propagate
+notifications, set <code class="docutils literal notranslate"><span class="pre">is_signal</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> and provide a <code class="docutils literal notranslate"><span class="pre">qname</span></code> (the
+Qt name for the signal) and <code class="docutils literal notranslate"><span class="pre">meta_method</span></code> (the <code class="docutils literal notranslate"><span class="pre">QMetaMethod</span></code> for the
+signal). The Qt <code class="docutils literal notranslate"><span class="pre">Signal</span></code> will only be connected to when a Traits listener
+is attached to this trait.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtTrait.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtTrait.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtTrait.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of this trait.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtTrait.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtTrait.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtTrait.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this trait and notify listeners.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtTrait.connect_signal">
+<code class="descname">connect_signal</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtTrait.connect_signal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtTrait.connect_signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to the Qt signal, if any.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtTrait.disconnect_signal">
+<code class="descname">disconnect_signal</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtTrait.disconnect_signal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtTrait.disconnect_signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect from the Qt signal, if any.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtProperty">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtProperty</code><span class="sig-paren">(</span><em>meta_prop</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.QtTrait" title="qt_binder.binder.QtTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.QtTrait</span></code></a></p>
+<p>Proxy trait for a Qt static property.</p>
+<p>Pass in a <code class="docutils literal notranslate"><span class="pre">QMetaProperty</span></code> from the <code class="docutils literal notranslate"><span class="pre">QMetaObject</span></code>.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtProperty.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtProperty.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtProperty.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of this trait.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtProperty.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtProperty.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtProperty.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this trait and notify listeners.</p>
+<p>If there is a Qt <code class="docutils literal notranslate"><span class="pre">Signal</span></code> for this property, it will notify the
+listeners. If there is not one for this property, this method will
+explicitly send a notification.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtDynamicProperty">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtDynamicProperty</code><span class="sig-paren">(</span><em>default_value=None</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtDynamicProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtDynamicProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.QtTrait" title="qt_binder.binder.QtTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.QtTrait</span></code></a></p>
+<p>A Qt dynamic property added to the <code class="docutils literal notranslate"><span class="pre">QObject</span></code>.</p>
+<p>The dynamic property will be created on the <code class="docutils literal notranslate"><span class="pre">QObject</span></code> when it is
+added to the <a class="reference internal" href="#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>. The default value given to this trait will
+be the initial value. It should be an object that can be passed to
+<code class="docutils literal notranslate"><span class="pre">QVariant</span></code>.</p>
+<p>Because most dynamic properties will be added this way to support Qt
+stylesheets, by default when the property is assigned a new value, the
+<code class="docutils literal notranslate"><span class="pre">QObject</span></code> associated with the <code class="docutils literal notranslate"><span class="pre">Binder</span></code> (which should be a <code class="docutils literal notranslate"><span class="pre">QWidget</span></code>)
+will be made to redraw itself in order to reevaluate the stylesheet rules
+with the new value. Turn this off by passing <code class="docutils literal notranslate"><span class="pre">styled=False</span></code> to the
+constructor.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtDynamicProperty.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtDynamicProperty.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtDynamicProperty.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of this trait.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtDynamicProperty.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtDynamicProperty.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtDynamicProperty.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this trait and notify listeners.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtGetterSetter">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtGetterSetter</code><span class="sig-paren">(</span><em>getter_name</em>, <em>setter_name=None</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtGetterSetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtGetterSetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.QtTrait" title="qt_binder.binder.QtTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.QtTrait</span></code></a></p>
+<p>Proxy for a getter/setter pair of methods.</p>
+<p>This is used for <code class="docutils literal notranslate"><span class="pre">value()/setValue()</span></code> pairs of methods that are
+frequently found in Qt, but which are not bona fide Qt properties.</p>
+<p>If the names follow this convention, you only need to pass the name of the
+getter method. Otherwise, pass both.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtGetterSetter.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtGetterSetter.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtGetterSetter.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of this trait.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtGetterSetter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtGetterSetter.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtGetterSetter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this trait and notify listeners.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtSlot">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtSlot</code><span class="sig-paren">(</span><em>meta_method</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtSlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtSlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.QtTrait" title="qt_binder.binder.QtTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.QtTrait</span></code></a></p>
+<p>Proxy for a Qt slot method.</p>
+<p>In general use, this trait will only be assigned to. If the slot takes no
+arguments, the value assigned is ignored. If the slot takes one argument,
+the value assigned is passed to the slot. If the slot takes more than one
+argument, the value assigned should be a tuple of the right size.</p>
+<p>As a convenience, getting the value of this trait will return the slot
+method object itself to allow you to connect to it using the normal Qt
+mechanism.</p>
+<p>The constructor should be passed the <code class="docutils literal notranslate"><span class="pre">QMetaMethod</span></code> for this slot.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtSlot.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>object</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtSlot.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtSlot.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the underlying method object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binder.QtSlot.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtSlot.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtSlot.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this trait.</p>
+<p>See <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtSlot</span></code></a> for details on how the value is processed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.QtSignal">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">QtSignal</code><span class="sig-paren">(</span><em>meta_method</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtSignal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.QtSlot</span></code></a></p>
+<p>Proxy for a Qt signal method.</p>
+<p>In general use, this trait will only be listened to for events that are
+emitted internally from Qt. However, it can be assigned values, with the
+same argument semantics as <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtSlot</span></code></a>. Like <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtSlot</span></code></a>,
+getting the value of this trait will return the signal method object itself
+for you to connect to it using the normal Qt mechanism.</p>
+<p>The constructor should be passed the <code class="docutils literal notranslate"><span class="pre">QMetaMethod</span></code> for this signal.</p>
+<dl class="method">
+<dt id="qt_binder.binder.QtSignal.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>object</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#QtSignal.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.QtSignal.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emit the signal with the given value.</p>
+<p>See <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtSlot</span></code></a> for details on how the value is processed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.Default">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">Default</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Specify a default value for an automatic QtTrait.</p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binder.Rename">
+<em class="property">class </em><code class="descclassname">qt_binder.binder.</code><code class="descname">Rename</code><span class="sig-paren">(</span><em>qt_name</em>, <em>default=&lt;undefined&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binder.html#Rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binder.Rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Specify that an automatic QtTrait be renamed.</p>
+<p>Use at the class level of a <a class="reference internal" href="#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> to rename the trait to
+something else.</p>
+<p>For <a class="reference internal" href="#qt_binder.binder.QtSlot" title="qt_binder.binder.QtSlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">QtSlot</span></code></a> traits with multiple signatures, only the primary
+part of the name (without the mangled type signature) needs to be given.</p>
+<p>Since one cannot use both a <a class="reference internal" href="#qt_binder.binder.Default" title="qt_binder.binder.Default"><code class="xref py py-class docutils literal notranslate"><span class="pre">Default</span></code></a> and <a class="reference internal" href="#qt_binder.binder.Rename" title="qt_binder.binder.Rename"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rename</span></code></a> at the
+same time, one can also specify the default value here.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">API Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="binding.html"
+                        title="next chapter"><code class="docutils literal notranslate"><span class="pre">qt_binder.binding</span></code></a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="../_sources/api/binder.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

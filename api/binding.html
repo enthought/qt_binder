@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.binding &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../genindex.html" >
+    <link rel="search" title="Search" href="../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../index.html" >
+    <link rel="up" title="API Reference" href="index.html" >
+    <link rel="next" title="qt_binder.bound_editor" href="bound_editor.html" >
+    <link rel="prev" title="qt_binder.binder" href="binder.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="index.html" accesskey="U">API Reference</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="bound_editor.html" title="qt_binder.bound_editor"
+           accesskey="N">next</a>
+      </li>
+      <li class="active">
+        <a href="binder.html" title="qt_binder.binder"
+           accesskey="P">previous</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="qt-binder-binding">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">qt_binder.binding</span></code><a class="headerlink" href="#qt-binder-binding" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qt_binder.binding.Binding">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">Binding</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Binding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Binding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Interface for a single binding pair.</p>
+<dl class="classmethod">
+<dt id="qt_binder.binding.Binding.parse">
+<em class="property">classmethod </em><code class="descname">parse</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Binding.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Binding.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a binding expression into the right <a class="reference internal" href="#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binding</span></code></a>
+subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.Binding.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Binding.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Binding.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.Binding.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Binding.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Binding.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binding.SetOnceTo">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">SetOnceTo</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SetOnceTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SetOnceTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.Binding</span></code></a></p>
+<p>Evaluate values once.</p>
+<p>The right item of the pair is a string that will be evaluated in the Traits
+UI context once on initialization.</p>
+<p>Mnemonic: <code class="docutils literal notranslate"><span class="pre">binder_trait</span> <span class="pre">is</span> <span class="pre">set</span> <span class="pre">once</span> <span class="pre">to</span> <span class="pre">expression</span></code></p>
+<dl class="method">
+<dt id="qt_binder.binding.SetOnceTo.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SetOnceTo.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SetOnceTo.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.SetOnceTo.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SetOnceTo.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SetOnceTo.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binding.Factory">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">Factory</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.Binding</span></code></a></p>
+<p>Call the factory to initialize a value.</p>
+<p>The right item of the pair is a callable that will be called once on
+initialization to provide a value for the destination trait.</p>
+<dl class="method">
+<dt id="qt_binder.binding.Factory.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Factory.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Factory.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.Factory.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#Factory.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.Factory.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binding.PulledFrom">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">PulledFrom</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PulledFrom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PulledFrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.Binding</span></code></a></p>
+<p>Listen to traits in the context.</p>
+<p>The right item of each pair is a string representing the extended trait to
+listen to. The first part of this string should be a key into the Traits UI
+context; e.g. to listen to the <code class="docutils literal notranslate"><span class="pre">foo</span></code> trait on the model object, use
+<code class="docutils literal notranslate"><span class="pre">'object.foo'</span></code>. When the <code class="docutils literal notranslate"><span class="pre">foo</span></code> trait on the model object fires a trait
+change notification, the <code class="docutils literal notranslate"><span class="pre">Binder</span></code> trait will be assigned. The reverse is
+not true: see <a class="reference internal" href="#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a> and <a class="reference internal" href="#qt_binder.binding.SyncedWith" title="qt_binder.binding.SyncedWith"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncedWith</span></code></a> for that
+functionality.</p>
+<p>Mnemonic: <code class="docutils literal notranslate"><span class="pre">binder_trait</span> <span class="pre">is</span> <span class="pre">pulled</span> <span class="pre">from</span> <span class="pre">context_trait</span></code></p>
+<dl class="method">
+<dt id="qt_binder.binding.PulledFrom.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PulledFrom.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PulledFrom.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.PulledFrom.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PulledFrom.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PulledFrom.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binding.PushedTo">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">PushedTo</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PushedTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PushedTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binding.Binding" title="qt_binder.binding.Binding"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.Binding</span></code></a></p>
+<p>Send trait updates from the <code class="docutils literal notranslate"><span class="pre">Binder</span></code> to the model.</p>
+<p>The right item of each pair is a string representing the extended trait to
+assign the value to. The first part of this string should be a key into the
+Traits UI context; e.g. to send to the <code class="docutils literal notranslate"><span class="pre">foo</span></code> trait on the model object,
+use <code class="docutils literal notranslate"><span class="pre">'object.foo'</span></code>. When a change notification for <code class="docutils literal notranslate"><span class="pre">binder_trait</span></code> is
+fired, <code class="docutils literal notranslate"><span class="pre">object.foo</span></code> will be assigned the sent object. The reverse is not
+true: see <a class="reference internal" href="#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a> and <a class="reference internal" href="#qt_binder.binding.SyncedWith" title="qt_binder.binding.SyncedWith"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncedWith</span></code></a> for that
+functionality.</p>
+<p>Mnemonic: <code class="docutils literal notranslate"><span class="pre">binder_trait</span> <span class="pre">is</span> <span class="pre">sent</span> <span class="pre">to</span> <span class="pre">context_trait</span></code></p>
+<dl class="method">
+<dt id="qt_binder.binding.PushedTo.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PushedTo.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PushedTo.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.PushedTo.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#PushedTo.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.PushedTo.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.binding.SyncedWith">
+<em class="property">class </em><code class="descclassname">qt_binder.binding.</code><code class="descname">SyncedWith</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SyncedWith"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SyncedWith" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.PulledFrom</span></code></a>, <a class="reference internal" href="#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binding.PushedTo</span></code></a></p>
+<p>Bidirectionally synchronize a <code class="docutils literal notranslate"><span class="pre">Binder</span></code> trait and a model trait.</p>
+<p>The right item of each pair is a string representing the extended trait to
+synchronize the binder trait with. The first part of this string should be
+a key into the Traits UI context; e.g. to synchronize with the <code class="docutils literal notranslate"><span class="pre">foo</span></code>
+trait on the model object, use <code class="docutils literal notranslate"><span class="pre">'object.foo'</span></code>. When a change notification
+for either trait is sent, the value will be assigned to the other. See
+<a class="reference internal" href="#qt_binder.binding.PulledFrom" title="qt_binder.binding.PulledFrom"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulledFrom</span></code></a> and <a class="reference internal" href="#qt_binder.binding.PushedTo" title="qt_binder.binding.PushedTo"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushedTo</span></code></a> for unidirectional
+synchronization.</p>
+<p>Mnemonic: <code class="docutils literal notranslate"><span class="pre">binder_trait</span> <span class="pre">is</span> <span class="pre">synced</span> <span class="pre">with</span> <span class="pre">context_trait</span></code></p>
+<dl class="method">
+<dt id="qt_binder.binding.SyncedWith.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>binder</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SyncedWith.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SyncedWith.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the binding and store the information needed to undo it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.binding.SyncedWith.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/binding.html#SyncedWith.unbind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.binding.SyncedWith.unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo the binding.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="binder.html"
+                        title="previous chapter"><code class="docutils literal notranslate"><span class="pre">qt_binder.binder</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bound_editor.html"
+                        title="next chapter"><code class="docutils literal notranslate"><span class="pre">qt_binder.bound_editor</span></code></a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="../_sources/api/binding.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.raw_widgets &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../../genindex.html" >
+    <link rel="search" title="Search" href="../../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../../index.html" >
+    <link rel="up" title="Module code" href="../index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="../index.html" accesskey="U">Module code</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <h1>Source code for qt_binder.raw_widgets</h1><div class="highlight"><pre>
+<span></span><span class="c1"># (C) Copyright 2014-2022 Enthought, Inc., Austin, TX</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is provided without warranty under the terms of the BSD</span>
+<span class="c1"># license included in LICENSE.txt and may be redistributed only under</span>
+<span class="c1"># the conditions described in the aforementioned license. The license</span>
+<span class="c1"># is also available online at http://www.enthought.com/licenses/BSD.txt</span>
+<span class="c1">#</span>
+<span class="c1"># Thanks for using Enthought open source!</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="kn">import</span> <span class="n">CList</span><span class="p">,</span> <span class="n">Either</span><span class="p">,</span> <span class="n">Instance</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Property</span><span class="p">,</span> <span class="n">Str</span><span class="p">,</span> \
+    <span class="n">TraitError</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">on_trait_change</span>
+
+<span class="kn">from</span> <span class="nn">.binder</span> <span class="kn">import</span> <span class="n">Binder</span><span class="p">,</span> <span class="n">Composite</span><span class="p">,</span> <span class="n">NChildren</span>
+<span class="kn">from</span> <span class="nn">.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">.qt.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">.type_registry</span> <span class="kn">import</span> <span class="n">TypeRegistry</span>
+
+
+<span class="c1">#: The global registry mapping PySide/PyQt types to their Binders.</span>
+<span class="n">binder_registry</span> <span class="o">=</span> <span class="n">TypeRegistry</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span>
+
+
+<span class="k">class</span> <span class="nc">Widget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+
+<span class="k">class</span> <span class="nc">DialogButtonBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span>
+
+
+<span class="c1"># PySide 6 removes this class in favor of QScreen (unwrapped)</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">QtGui</span><span class="p">,</span> <span class="s1">&#39;QDesktopWidget&#39;</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">DesktopWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+        <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDesktopWidget</span>
+
+
+<span class="k">class</span> <span class="nc">LineEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span>
+
+
+<div class="viewcode-block" id="ComboBox"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.ComboBox">[docs]</a><span class="k">class</span> <span class="nc">ComboBox</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Customized to exposed the line-edit widget as a child</span>
+<span class="sd">    :class:`~.Binder`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span>
+
+    <span class="n">lineEdit_class</span> <span class="o">=</span> <span class="n">LineEdit</span>
+    <span class="n">lineEdit</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">LineEdit</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;editable,qobj&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_editable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">editable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit_class</span><span class="p">(</span><span class="n">qobj</span><span class="o">=</span><span class="n">qobj</span><span class="o">.</span><span class="n">lineEdit</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<span class="k">class</span> <span class="nc">FontComboBox</span><span class="p">(</span><span class="n">ComboBox</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontComboBox</span>
+
+
+<span class="k">class</span> <span class="nc">CalendarWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCalendarWidget</span>
+
+
+<span class="k">class</span> <span class="nc">PushButton</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span>
+
+
+<span class="k">class</span> <span class="nc">CommandLinkButton</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCommandLinkButton</span>
+
+
+<span class="k">class</span> <span class="nc">CheckBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span>
+
+
+<span class="k">class</span> <span class="nc">ToolButton</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span>
+
+
+<span class="k">class</span> <span class="nc">RadioButton</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QRadioButton</span>
+
+
+<span class="k">class</span> <span class="nc">WizardPage</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWizardPage</span>
+
+
+<span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span>
+
+
+<span class="k">class</span> <span class="nc">ToolBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBox</span>
+
+
+<span class="k">class</span> <span class="nc">TreeView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span>
+
+
+<span class="k">class</span> <span class="nc">TreeWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span>
+
+
+<span class="k">class</span> <span class="nc">HeaderView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHeaderView</span>
+
+
+<span class="k">class</span> <span class="nc">TableView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span>
+
+
+<span class="k">class</span> <span class="nc">TableWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidget</span>
+
+
+<span class="k">class</span> <span class="nc">ColumnView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColumnView</span>
+
+
+<span class="k">class</span> <span class="nc">ListView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListView</span>
+
+
+<span class="k">class</span> <span class="nc">UndoView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QUndoView</span>
+
+
+<span class="k">class</span> <span class="nc">ListWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span>
+
+
+<span class="k">class</span> <span class="nc">ScrollArea</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollArea</span>
+
+
+<span class="k">class</span> <span class="nc">PlainTextEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPlainTextEdit</span>
+
+
+<span class="k">class</span> <span class="nc">TextEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span>
+
+
+<span class="k">class</span> <span class="nc">TextBrowser</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextBrowser</span>
+
+
+<span class="k">class</span> <span class="nc">MdiArea</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMdiArea</span>
+
+
+<span class="k">class</span> <span class="nc">GraphicsView</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span>
+
+
+<span class="k">class</span> <span class="nc">StackedWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStackedWidget</span>
+
+
+<span class="k">class</span> <span class="nc">LCDNumber</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLCDNumber</span>
+
+
+<span class="k">class</span> <span class="nc">Label</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span>
+
+
+<span class="k">class</span> <span class="nc">ToolBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBar</span>
+
+
+<span class="k">class</span> <span class="nc">RubberBand</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QRubberBand</span>
+
+
+<span class="k">class</span> <span class="nc">TabWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span>
+
+
+<span class="k">class</span> <span class="nc">StatusBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStatusBar</span>
+
+
+<span class="k">class</span> <span class="nc">TabBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabBar</span>
+
+
+<span class="k">class</span> <span class="nc">SplitterHandle</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitterHandle</span>
+
+
+<span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span>
+
+
+<span class="k">class</span> <span class="nc">Dial</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDial</span>
+
+
+<span class="k">class</span> <span class="nc">ScrollBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollBar</span>
+
+
+<span class="k">class</span> <span class="nc">DateTimeEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDateTimeEdit</span>
+
+
+<span class="k">class</span> <span class="nc">DateEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDateEdit</span>
+
+
+<span class="k">class</span> <span class="nc">TimeEdit</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTimeEdit</span>
+
+
+<span class="k">class</span> <span class="nc">DoubleSpinBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span>
+
+
+<span class="k">class</span> <span class="nc">SpinBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span>
+
+
+<span class="k">class</span> <span class="nc">SplashScreen</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplashScreen</span>
+
+
+<span class="k">class</span> <span class="nc">SizeGrip</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizeGrip</span>
+
+
+<span class="k">class</span> <span class="nc">Dialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span>
+
+
+<span class="k">class</span> <span class="nc">ColorDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColorDialog</span>
+
+
+<span class="k">class</span> <span class="nc">PrintDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrintDialog</span>
+
+
+<span class="k">class</span> <span class="nc">PageSetupDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPageSetupDialog</span>
+
+
+<span class="k">class</span> <span class="nc">FileDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span>
+
+
+<span class="k">class</span> <span class="nc">Wizard</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWizard</span>
+
+
+<span class="k">class</span> <span class="nc">ProgressDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QProgressDialog</span>
+
+
+<span class="k">class</span> <span class="nc">PrintPreviewDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrintPreviewDialog</span>
+
+
+<span class="k">class</span> <span class="nc">FontDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontDialog</span>
+
+
+<span class="k">class</span> <span class="nc">MessageBox</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span>
+
+
+<span class="k">class</span> <span class="nc">InputDialog</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QInputDialog</span>
+
+
+<span class="k">class</span> <span class="nc">ErrorMessage</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QErrorMessage</span>
+
+
+<span class="k">class</span> <span class="nc">ProgressBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QProgressBar</span>
+
+
+<span class="k">class</span> <span class="nc">PrintPreviewWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrintPreviewWidget</span>
+
+
+<span class="k">class</span> <span class="nc">MenuBar</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenuBar</span>
+
+
+<span class="k">class</span> <span class="nc">Menu</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span>
+
+
+<span class="k">class</span> <span class="nc">MdiSubWindow</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMdiSubWindow</span>
+
+
+<span class="k">class</span> <span class="nc">MainWindow</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span>
+
+
+<span class="k">class</span> <span class="nc">SingleChild</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for widgets that typically have just a single child.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+    <span class="n">child</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleChild</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">child</span><span class="o">=</span><span class="n">child</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleChild</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleChild</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">GroupBox</span><span class="p">(</span><span class="n">SingleChild</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span>
+
+
+<span class="k">class</span> <span class="nc">FocusFrame</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFocusFrame</span>
+
+
+<span class="k">class</span> <span class="nc">DockWidget</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDockWidget</span>
+
+
+<div class="viewcode-block" id="Layout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.Layout">[docs]</a><span class="k">class</span> <span class="nc">Layout</span><span class="p">(</span><span class="n">NChildren</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for all `QLayouts`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">children</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Layout.construct"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.Layout.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Build the QLayout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Splitter"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.Splitter">[docs]</a><span class="k">class</span> <span class="nc">Splitter</span><span class="p">(</span><span class="n">NChildren</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A splitter widget for arbitrary numbers of children.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitter</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">children</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Splitter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Splitter.construct"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.Splitter.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Build the QLayout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Splitter.configure"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.Splitter.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StackedLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">qobj</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BoxLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.BoxLayout">[docs]</a><span class="k">class</span> <span class="nc">BoxLayout</span><span class="p">(</span><span class="n">Layout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for box layouts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBoxLayout</span>
+
+<div class="viewcode-block" id="BoxLayout.configure"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.BoxLayout.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BoxLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="VBoxLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.VBoxLayout">[docs]</a><span class="k">class</span> <span class="nc">VBoxLayout</span><span class="p">(</span><span class="n">BoxLayout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A vertical layout.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span></div>
+
+
+<div class="viewcode-block" id="HBoxLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.HBoxLayout">[docs]</a><span class="k">class</span> <span class="nc">HBoxLayout</span><span class="p">(</span><span class="n">BoxLayout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A horizontal layout.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span></div>
+
+
+<div class="viewcode-block" id="StackedLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.StackedLayout">[docs]</a><span class="k">class</span> <span class="nc">StackedLayout</span><span class="p">(</span><span class="n">Layout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A stacked layout.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStackedLayout</span>
+
+<div class="viewcode-block" id="StackedLayout.configure"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.StackedLayout.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StackedLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_binders</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">qobj</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">BasicGridLayout</span><span class="p">(</span><span class="n">Layout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An explicit grid layout without colspans or rowspans.</span>
+
+<span class="sd">    The arguments are equal-length lists of `Binder` widgets, `unicode` labels,</span>
+<span class="sd">    `(Binder, Qt.Alignment)` tuples, `(unicode, Qt.Alignment)` tuples, or</span>
+<span class="sd">    `None` for an empty grid cell.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span>
+
+    <span class="c1">#: List of lists of `Binders`, `unicode` labels, or `None`. Each list</span>
+    <span class="c1">#: should have the same number of elements (i.e. the number of columns.</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">CList</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span>
+        <span class="n">Unicode</span><span class="p">,</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span> <span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="p">),</span>
+                                       <span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">))),</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Unicode</span><span class="p">,</span> <span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="p">),</span>
+                              <span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">))),</span>
+    <span class="p">)))</span>
+
+    <span class="c1">#: The child ``Binder`` instances.</span>
+    <span class="n">child_binders</span> <span class="o">=</span> <span class="n">Property</span><span class="p">(</span><span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">rows</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">all_ncols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_ncols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># FIXME: Validate on trait assignment, too.</span>
+            <span class="k">raise</span> <span class="n">TraitError</span><span class="p">(</span><span class="s2">&quot;Expected the same number of columns: &quot;</span>
+                             <span class="s2">&quot;got </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">all_ncols</span><span class="p">))</span>
+        <span class="c1"># Skip the Layout.__init__().</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">  id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">  </span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">irow</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">icol</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="n">alignment</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">cell</span><span class="p">,</span> <span class="n">alignment</span> <span class="o">=</span> <span class="n">cell</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+                    <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+                    <span class="n">widget</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+                    <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">,</span> <span class="n">alignment</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+                        <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">,</span> <span class="n">alignment</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                        <span class="n">qobj</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">,</span> <span class="n">alignment</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected a QWidget or QLayout: &quot;</span>
+                                        <span class="s2">&quot;got </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">))</span>
+                <span class="c1"># Ignore None.</span>
+
+    <span class="k">def</span> <span class="nf">_get_child_binders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                    <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Binder</span><span class="p">):</span>
+                    <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">children</span>
+
+
+<span class="k">class</span> <span class="nc">SpanGridLayout</span><span class="p">(</span><span class="n">Layout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Grid layout with spans.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span>
+
+    <span class="c1">#: Items to add: `(Binder/unicode, row, col[, rowspan, colspan]</span>
+    <span class="c1">#: [, alignment])`</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span> <span class="n">Unicode</span><span class="p">),</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">),</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span> <span class="n">Unicode</span><span class="p">),</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span>
+              <span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="p">)),</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span> <span class="n">Unicode</span><span class="p">),</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">),</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span> <span class="n">Unicode</span><span class="p">),</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span>
+              <span class="n">Instance</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="p">)),</span>
+    <span class="p">))</span>
+
+    <span class="c1">#: The child ``Binder`` instances.</span>
+    <span class="n">child_binders</span> <span class="o">=</span> <span class="n">Property</span><span class="p">(</span><span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+        <span class="c1"># Skip the Layout.__init__().</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">  id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="se">\n</span><span class="s1">  </span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+                <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">label</span><span class="p">,)</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># isiinstance(cell, Binder)</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">qobj</span><span class="p">,)</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected a QWidget or QLayout: &quot;</span>
+                                <span class="s2">&quot;got </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">_get_child_binders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Binder</span><span class="p">):</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">children</span>
+
+
+<div class="viewcode-block" id="FormLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.FormLayout">[docs]</a><span class="k">class</span> <span class="nc">FormLayout</span><span class="p">(</span><span class="n">Layout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Children are (label, widget) pairs.</span>
+
+<span class="sd">    The label can be a ``unicode`` string or ``None``. The last item can be</span>
+<span class="sd">    a single ``Binder`` to take up the whole space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFormLayout</span>
+
+    <span class="c1">#: The (label, widget) pairs.</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span>
+        <span class="n">Tuple</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)),</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)),</span>
+        <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">),</span>
+    <span class="p">))</span>
+
+    <span class="c1">#: The child ``Binder`` instances.</span>
+    <span class="n">child_binders</span> <span class="o">=</span> <span class="n">Property</span><span class="p">(</span><span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">rows</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+        <span class="c1"># Skip the Layout.__init__().</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FormLayout.configure"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.FormLayout.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">widget</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">qobj</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">qobj</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="s1">&#39;, id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_child_binders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">widget</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                    <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">Binder</span><span class="p">):</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">children</span></div>
+
+
+<div class="viewcode-block" id="WithLayout"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.WithLayout">[docs]</a><span class="k">class</span> <span class="nc">WithLayout</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A dumb `QWidget` wrapper with a child `Layout`.</span>
+
+<span class="sd">    This is needed in some places where a true `QWidget` is needed instead of</span>
+<span class="sd">    a `QLayout`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+    <span class="n">child_layout</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Layout</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WithLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">child_layout</span><span class="o">=</span><span class="n">layout</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WithLayout.configure"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.WithLayout.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WithLayout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">child_layout</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">child_layout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="s1">&#39;, id=</span><span class="si">{0.id!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ButtonGroup"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.ButtonGroup">[docs]</a><span class="k">class</span> <span class="nc">ButtonGroup</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A group of buttons.</span>
+
+<span class="sd">    This is a special `Binder` used in the `button_groups=` keyword to `Bound`.</span>
+<span class="sd">    `ButtonGroup` is not a widget, so it does not get put into the widget</span>
+<span class="sd">    hierarchy. It is given the ID strings of the button `Binders` that belong</span>
+<span class="sd">    to the group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QButtonGroup</span>
+
+    <span class="c1">#: List of `Binder` ID strings or `(binder_id_str, qt_id_int)`</span>
+    <span class="n">button_ids</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Either</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">Int</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">button_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="n">button_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">button_ids</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ButtonGroup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">button_ids</span><span class="o">=</span><span class="n">button_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ButtonGroup.add_buttons_from_context"><a class="viewcode-back" href="../../api/raw_widgets.html#qt_binder.raw_widgets.ButtonGroup.add_buttons_from_context">[docs]</a>    <span class="k">def</span> <span class="nf">add_buttons_from_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Pull out the required buttons from the context and add them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">button_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">button_ids</span><span class="p">:</span>
+            <span class="n">qt_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">button_id</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">button_id</span><span class="p">,</span> <span class="n">qt_id</span> <span class="o">=</span> <span class="n">button_id</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="n">button_id</span><span class="p">]</span><span class="o">.</span><span class="n">qobj</span>
+            <span class="k">if</span> <span class="n">qt_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="n">qt_id</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># These classes are not intended to be automatically looked up from their Qt</span>
+<span class="c1"># classes.</span>
+<span class="n">_EXCLUDE_FROM_REGISTRY</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Composite</span><span class="p">,</span>
+    <span class="n">NChildren</span><span class="p">,</span>
+    <span class="n">SingleChild</span><span class="p">,</span>
+    <span class="n">SpanGridLayout</span><span class="p">,</span>
+    <span class="n">WithLayout</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">vars</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">_EXCLUDE_FROM_REGISTRY</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Binder</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Binder</span><span class="p">):</span>
+        <span class="n">binder_registry</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">qclass</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

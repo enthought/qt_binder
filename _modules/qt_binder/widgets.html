@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.widgets &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../../genindex.html" >
+    <link rel="search" title="Search" href="../../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../../index.html" >
+    <link rel="up" title="Module code" href="../index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="../index.html" accesskey="U">Module code</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <h1>Source code for qt_binder.widgets</h1><div class="highlight"><pre>
+<span></span><span class="c1"># (C) Copyright 2014-2022 Enthought, Inc., Austin, TX</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is provided without warranty under the terms of the BSD</span>
+<span class="c1"># license included in LICENSE.txt and may be redistributed only under</span>
+<span class="c1"># the conditions described in the aforementioned license. The license</span>
+<span class="c1"># is also available online at http://www.enthought.com/licenses/BSD.txt</span>
+<span class="c1">#</span>
+<span class="c1"># Thanks for using Enthought open source!</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Constant</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Instance</span><span class="p">,</span> \
+    <span class="n">Int</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NO_COMPARE</span><span class="p">,</span> <span class="n">Str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">on_trait_change</span>
+
+<span class="kn">from</span> <span class="nn">.binder</span> <span class="kn">import</span> <span class="n">Binder</span><span class="p">,</span> <span class="n">QtDynamicProperty</span><span class="p">,</span> <span class="n">Rename</span><span class="p">,</span> <span class="n">Default</span>
+<span class="kn">from</span> <span class="nn">.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">.qt.ui_loader</span> <span class="kn">import</span> <span class="n">load_ui</span>
+<span class="kn">from</span> <span class="nn">.raw_widgets</span> <span class="kn">import</span> <span class="n">ComboBox</span><span class="p">,</span> <span class="n">Composite</span><span class="p">,</span> <span class="n">LineEdit</span><span class="p">,</span> <span class="n">Slider</span><span class="p">,</span> <span class="n">binder_registry</span>
+
+
+<span class="n">INVALID_STYLE_RULE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;*[valid=&#39;false&#39;] &quot;</span>
+                      <span class="s2">&quot;{ background-color: rgb(255, 192, 192); }&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TextField"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.TextField">[docs]</a><span class="k">class</span> <span class="nc">TextField</span><span class="p">(</span><span class="n">LineEdit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simple customization of a LineEdit.</span>
+
+<span class="sd">    The widget can be configured to update the model on every text change or</span>
+<span class="sd">    only when Enter is pressed (or focus leaves). This emulates Traits UI&#39;s</span>
+<span class="sd">    `TextEditor` `auto_set` and `enter_set` configurations.</span>
+
+<span class="sd">    If a validator is set, invalid text will cause the background to be red.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The value to sync with the model.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Unicode</span><span class="p">(</span><span class="n">comparison_mode</span><span class="o">=</span><span class="n">NO_COMPARE</span><span class="p">)</span>
+
+    <span class="c1">#: Whether the `value` updates on every keypress, or when Enter is pressed</span>
+    <span class="c1">#: (or `focusOut`).</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;enter&#39;</span><span class="p">)</span>
+
+    <span class="c1">#: Whether or not the current value is valid, for the stylesheet.</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">QtDynamicProperty</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TextField.configure"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.TextField.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span> <span class="o">=</span> <span class="n">INVALID_STYLE_RULE</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the valid trait based on validation of ``text``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span>
+        <span class="k">if</span> <span class="n">validator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state</span><span class="p">,</span> <span class="n">fixed</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">state</span> <span class="o">==</span> <span class="n">validator</span><span class="o">.</span><span class="n">Acceptable</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;textEdited&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_textEdited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">and</span>
+                <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">):</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_valid</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;editingFinished&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_editingFinished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;text,validator&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_valid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="EditableComboBox"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.EditableComboBox">[docs]</a><span class="k">class</span> <span class="nc">EditableComboBox</span><span class="p">(</span><span class="n">ComboBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; ComboBox with an editable text field.</span>
+
+<span class="sd">    We do not do bidirectional synchronization of the value with the model</span>
+<span class="sd">    since that is typically not required for these use cases.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lineEdit_class</span> <span class="o">=</span> <span class="n">TextField</span>
+
+    <span class="c1">#: The selected value.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Any</span><span class="p">(</span><span class="n">Undefined</span><span class="p">,</span> <span class="n">comparison_mode</span><span class="o">=</span><span class="n">NO_COMPARE</span><span class="p">)</span>
+
+    <span class="c1">#: (object, label) pairs.</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Tuple</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">))</span>
+
+    <span class="c1">#: Function that is used to compare two objects in the values list for</span>
+    <span class="c1">#: equality. Defaults to normal Python equality.</span>
+    <span class="n">same_as</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">eq</span><span class="p">)</span>
+
+    <span class="n">editable</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EditableComboBox.configure"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.EditableComboBox.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_editable</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EditableComboBox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span></div>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;values,values_items,qobj&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_update_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">current_text</span> <span class="o">=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+            <span class="n">current_index</span> <span class="o">=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+            <span class="c1"># Check if the user entered in custom text that should be</span>
+            <span class="c1"># preserved.</span>
+            <span class="n">preserve_text</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span>
+                             <span class="n">qobj</span><span class="o">.</span><span class="n">itemData</span><span class="p">(</span><span class="n">current_index</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span>
+                             <span class="n">current_text</span> <span class="o">!=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">current_index</span><span class="p">))</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">new_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">same_as</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">old_value</span><span class="p">):</span>
+                    <span class="n">new_index</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">qobj</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">qobj</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="c1"># Items from the list get their index into the values list</span>
+                <span class="c1"># added as their user data as well. Items added from the text</span>
+                <span class="c1"># field will have that still be None.</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+                    <span class="n">qobj</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">preserve_text</span><span class="p">:</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">setEditText</span><span class="p">(</span><span class="n">current_text</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">current_text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;currentIndexChanged&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_currentIndexChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="n">values_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">itemData</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">values_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">values_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Otherwise, it&#39;s one of the added values.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;lineEdit:textEdited&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_textEdited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">text</span></div>
+
+
+<div class="viewcode-block" id="EnumDropDown"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.EnumDropDown">[docs]</a><span class="k">class</span> <span class="nc">EnumDropDown</span><span class="p">(</span><span class="n">ComboBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Select from a set of preloaded choices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The selected value.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Any</span><span class="p">(</span><span class="n">Undefined</span><span class="p">,</span> <span class="n">comparison_mode</span><span class="o">=</span><span class="n">NO_COMPARE</span><span class="p">)</span>
+
+    <span class="c1">#: (object, label) pairs.</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Tuple</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">))</span>
+
+    <span class="c1">#: Function that is used to compare two objects in the values list for</span>
+    <span class="c1">#: equality. Defaults to normal Python equality.</span>
+    <span class="n">same_as</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">eq</span><span class="p">)</span>
+
+    <span class="n">editable</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;values,values_items,qobj&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_update_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">qobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="n">qobj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editable</span><span class="p">:</span>
+                <span class="n">new_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">same_as</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">old_value</span><span class="p">):</span>
+                    <span class="n">new_index</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">qobj</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">qobj</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">qobj</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">qobj</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;currentIndexChanged&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_currentIndexChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="n">new_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">same_as</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+                        <span class="n">new_index</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="k">break</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">=</span> <span class="n">new_index</span></div>
+
+
+<div class="viewcode-block" id="UIFile"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.UIFile">[docs]</a><span class="k">class</span> <span class="nc">UIFile</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load a layout from a Qt Designer `.ui` file.</span>
+
+<span class="sd">    Widgets and layouts with names that do not start with underscores will be</span>
+<span class="sd">    added as traits to this :class:`~.Binder`. The :data:`~.binder_registry`</span>
+<span class="sd">    will be consulted to find the raw :class:`~.Binder` to use for each widget.</span>
+<span class="sd">    This can be overridden for any named widget using the :attr:`overrides`</span>
+<span class="sd">    trait.</span>
+
+<span class="sd">    In case one wants to let the :class:`~.Binder` to own its widget but just</span>
+<span class="sd">    use the `.ui` file for layout, use the :attr:`insertions` dictionary. The</span>
+<span class="sd">    named widget should be a plain `QWidget` in the UI laid out as desired. The</span>
+<span class="sd">    :class:`~.Binder` will create a new widget as the lone child of this</span>
+<span class="sd">    widget and take up all of its space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+    <span class="c1">#: The .ui file with the layout.</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Str</span><span class="p">()</span>
+
+    <span class="c1">#: Override binders for named widgets.</span>
+    <span class="n">overrides</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">))</span>
+
+    <span class="c1">#: Insert binders as children of the named QWidgets.</span>
+    <span class="n">insertions</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UIFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UIFile.construct"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.UIFile.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">qobj</span><span class="p">,</span> <span class="n">to_be_bound</span> <span class="o">=</span> <span class="n">load_ui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">to_be_bound</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">qobj</span><span class="o">.</span><span class="n">findChild</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_trait</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">:</span>
+                <span class="n">binder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">binder</span><span class="o">.</span><span class="n">qobj</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">insertions</span><span class="p">:</span>
+                <span class="n">binder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">insertions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">binder</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+                <span class="n">old_layout</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">old_layout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Qt hack to replace the layout. We need to ensure that the</span>
+                    <span class="c1"># old one is truly deleted. Reparent it onto a widget that</span>
+                    <span class="c1"># we then discard.</span>
+                    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">old_layout</span><span class="p">)</span>
+                <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">binder</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">binder</span> <span class="o">=</span> <span class="n">binder_registry</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">obj</span><span class="p">)()</span>
+                <span class="n">binder</span><span class="o">.</span><span class="n">qobj</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">binder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span> <span class="o">=</span> <span class="n">qobj</span></div></div>
+
+
+<div class="viewcode-block" id="BaseSlider"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.BaseSlider">[docs]</a><span class="k">class</span> <span class="nc">BaseSlider</span><span class="p">(</span><span class="n">Slider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for the other sliders.</span>
+
+<span class="sd">    Mostly for interface-checking and common defaults.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The value to synch with the model.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Any</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">#: The inclusive range.</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Any</span><span class="p">(</span><span class="mi">99</span><span class="p">))</span>
+
+    <span class="c1">#: The underlying Qt value.</span>
+    <span class="n">qt_value</span> <span class="o">=</span> <span class="n">Rename</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+
+    <span class="c1"># The Qt default is vertical for some awful reason.</span>
+    <span class="n">orientation</span> <span class="o">=</span> <span class="n">Default</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IntSlider"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.IntSlider">[docs]</a><span class="k">class</span> <span class="nc">IntSlider</span><span class="p">(</span><span class="n">BaseSlider</span><span class="p">):</span>
+
+    <span class="c1">#: The value to synch with the model.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">#: The inclusive range.</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Int</span><span class="p">(</span><span class="mi">99</span><span class="p">))</span>
+
+<div class="viewcode-block" id="IntSlider.configure"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.IntSlider.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Set the initial values.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_range_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value_changed</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_range_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">minimum</span><span class="p">,</span> <span class="n">maximum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span>
+                <span class="n">minimum</span><span class="o">=</span><span class="n">minimum</span><span class="p">,</span>
+                <span class="n">maximum</span><span class="o">=</span><span class="n">maximum</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qt_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;qt_value&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_qt_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qt_value</span></div>
+
+
+<div class="viewcode-block" id="FloatSlider"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.FloatSlider">[docs]</a><span class="k">class</span> <span class="nc">FloatSlider</span><span class="p">(</span><span class="n">BaseSlider</span><span class="p">):</span>
+
+    <span class="c1">#: The value to synch with the model.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="c1">#: The inclusive range.</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="c1">#: The number of steps in the range.</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FloatSlider.configure"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.FloatSlider.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Set the initial values.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_precision_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value_changed</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_precision_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+
+    <span class="k">def</span> <span class="nf">_range_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value_changed</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qt_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qt_value_from_python</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;qt_value&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_qt_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_python_value_from_qt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qt_value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_qt_value_from_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+        <span class="n">qt_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">value</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">*</span> <span class="n">precision</span> <span class="o">/</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)))</span>
+        <span class="n">qt_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">qt_value</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">precision</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qt_value</span>
+
+    <span class="k">def</span> <span class="nf">_python_value_from_qt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qt_value</span><span class="p">):</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">qt_value</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">precision</span> <span class="o">+</span> <span class="n">low</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="LogSlider"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.LogSlider">[docs]</a><span class="k">class</span> <span class="nc">LogSlider</span><span class="p">(</span><span class="n">FloatSlider</span><span class="p">):</span>
+
+    <span class="c1">#: The inclusive range.</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Float</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="mf">100.0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_qt_value_from_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">low</span><span class="p">)</span>
+        <span class="n">log_low</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
+        <span class="n">log_high</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+        <span class="n">log_value</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">qt_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">log_value</span> <span class="o">-</span> <span class="n">log_low</span><span class="p">)</span> <span class="o">*</span>
+                             <span class="n">precision</span> <span class="o">/</span>
+                             <span class="p">(</span><span class="n">log_high</span> <span class="o">-</span> <span class="n">log_low</span><span class="p">)))</span>
+        <span class="n">qt_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">qt_value</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">precision</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qt_value</span>
+
+    <span class="k">def</span> <span class="nf">_python_value_from_qt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qt_value</span><span class="p">):</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+        <span class="n">log_low</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
+        <span class="n">log_high</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+        <span class="n">log_value</span> <span class="o">=</span> <span class="n">qt_value</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_high</span> <span class="o">-</span> <span class="n">log_low</span><span class="p">)</span> <span class="o">/</span> <span class="n">precision</span> <span class="o">+</span> <span class="n">log_low</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="n">log_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="RangeSlider"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.RangeSlider">[docs]</a><span class="k">class</span> <span class="nc">RangeSlider</span><span class="p">(</span><span class="n">Composite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A slider with labels and a text entry field.</span>
+
+<span class="sd">    The root widget is a `QWidget` with a new property</span>
+<span class="sd">    `binder_class=RangeSlider`. Stylesheets can reference it using the</span>
+<span class="sd">    selector::</span>
+
+<span class="sd">        *[binder_class=&quot;RangeSlider&quot;] {...}</span>
+
+<span class="sd">    This can be useful for styling the child `QLabels` and `QLineEdit`, for</span>
+<span class="sd">    example to make a series of `RangeSliders` align.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+    <span class="c1">#: The value to synch with the model.</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Any</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">#: The inclusive range.</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">(</span><span class="n">Any</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Any</span><span class="p">(</span><span class="mi">99</span><span class="p">))</span>
+
+    <span class="c1">#: The formatting function for the labels.</span>
+    <span class="n">label_format_func</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">text_type</span><span class="p">)</span>
+
+    <span class="c1">#: The formatting function for the text field. This is used only when the</span>
+    <span class="c1">#: slider is setting the value.</span>
+    <span class="n">field_format_func</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">text_type</span><span class="p">)</span>
+
+    <span class="c1">#: The slider widget.</span>
+    <span class="n">slider</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">BaseSlider</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="n">IntSlider</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">())</span>
+
+    <span class="c1">#: The field widget.</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">TextField</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">())</span>
+
+    <span class="n">_low_label</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+    <span class="n">_high_label</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+    <span class="n">_from_text_func</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="c1"># Make sure that a `slider` argument gets assigned before anything else</span>
+        <span class="c1"># because it will affect what range can be accepted.</span>
+        <span class="k">if</span> <span class="s1">&#39;slider&#39;</span> <span class="ow">in</span> <span class="n">traits</span><span class="p">:</span>
+            <span class="n">slider</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;slider&#39;</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">RangeSlider</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slider</span> <span class="o">=</span> <span class="n">slider</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span><span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">RangeSlider</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RangeSlider.construct"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.RangeSlider.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RangeSlider</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setProperty</span><span class="p">(</span><span class="s1">&#39;binder_class&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;RangeSlider&#39;</span><span class="p">)</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_low_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_low_label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_high_label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_high_label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low_label</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_high_label</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RangeSlider.configure"><a class="viewcode-back" href="../../api/widgets.html#qt_binder.widgets.RangeSlider.configure">[docs]</a>    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RangeSlider</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">,</span> <span class="n">IntSlider</span><span class="p">):</span>
+            <span class="c1"># Use an integer validator for the text field.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIntValidator</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_from_text_func</span> <span class="o">=</span> <span class="nb">int</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleValidator</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_from_text_func</span> <span class="o">=</span> <span class="nb">float</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_widgets</span><span class="p">()</span></div>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;value,range&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_update_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Update the range then the value because the widgets will just</span>
+        <span class="c1"># silently reject values out of bounds.</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+                <span class="nb">range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">,</span> <span class="n">IntSlider</span><span class="p">):</span>
+                        <span class="c1"># Note: this assumes that all sliders other than</span>
+                        <span class="c1"># IntSlider have decimal inputs.</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_low_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_format_func</span><span class="p">(</span><span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_high_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_format_func</span><span class="p">(</span><span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">six</span><span class="o">.</span><span class="n">text_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="nb">range</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;slider:value&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_slider_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_format_func</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@on_trait_change</span><span class="p">(</span><span class="s1">&#39;field:value&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_on_field_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">loopback_guard</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_text_func</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

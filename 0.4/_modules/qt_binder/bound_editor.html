@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.bound_editor &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../../genindex.html" >
+    <link rel="search" title="Search" href="../../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../../index.html" >
+    <link rel="up" title="Module code" href="../index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="../index.html" accesskey="U">Module code</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <h1>Source code for qt_binder.bound_editor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># (C) Copyright 2014-2022 Enthought, Inc., Austin, TX</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This software is provided without warranty under the terms of the BSD</span>
+<span class="c1"># license included in LICENSE.txt and may be redistributed only under</span>
+<span class="c1"># the conditions described in the aforementioned license. The license</span>
+<span class="c1"># is also available online at http://www.enthought.com/licenses/BSD.txt</span>
+<span class="c1">#</span>
+<span class="c1"># Thanks for using Enthought open source!</span>
+
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Either</span><span class="p">,</span> <span class="n">HasPrivateTraits</span><span class="p">,</span> \
+    <span class="n">Instance</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Str</span><span class="p">,</span> <span class="n">Undefined</span>
+<span class="kn">from</span> <span class="nn">traitsui.editor_factory</span> <span class="kn">import</span> <span class="n">EditorFactory</span>
+<span class="kn">from</span> <span class="nn">traitsui.item</span> <span class="kn">import</span> <span class="n">Item</span>
+<span class="kn">from</span> <span class="nn">traitsui.qt4.editor</span> <span class="kn">import</span> <span class="n">Editor</span>
+
+<span class="kn">from</span> <span class="nn">.binder</span> <span class="kn">import</span> <span class="n">Binder</span>
+<span class="kn">from</span> <span class="nn">.binding</span> <span class="kn">import</span> <span class="n">Binding</span>
+<span class="kn">from</span> <span class="nn">.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">.raw_widgets</span> <span class="kn">import</span> <span class="n">ButtonGroup</span>
+
+
+<div class="viewcode-block" id="TraitsUI"><a class="viewcode-back" href="../../api/bound_editor.html#qt_binder.bound_editor.TraitsUI">[docs]</a><span class="k">class</span> <span class="nc">TraitsUI</span><span class="p">(</span><span class="n">Binder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Place a Traits UI `Item` into a `Bound` layout.</span>
+
+<span class="sd">    The automatically-added traits are only those for `QWidget`, not whatever</span>
+<span class="sd">    widget the root control of the `Item` may turn out to be. This</span>
+<span class="sd">    :class:`~.Binder` can only be used in the context of a :class:`~.Bound`</span>
+<span class="sd">    layout because it needs to be specially recognized and initialized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qclass</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span>
+
+    <span class="c1">#: The Traits UI Item to display. Any label is ignored.</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Item</span><span class="p">)</span>
+
+    <span class="c1"># The `UI` object of the whole `View`.</span>
+    <span class="n">_ui</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+
+    <span class="c1"># The initialized editor.</span>
+    <span class="n">_editor</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TraitsUI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">item</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TraitsUI.initialize_item"><a class="viewcode-back" href="../../api/bound_editor.html#qt_binder.bound_editor.TraitsUI.initialize_item">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize the item using the Traits UI `UI` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span>
+        <span class="nb">object</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">object_</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">ui</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">trait</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">base_trait</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Get the editor factory associated with the Item:</span>
+        <span class="n">editor_factory</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">editor</span>
+        <span class="k">if</span> <span class="n">editor_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">editor_factory</span> <span class="o">=</span> <span class="n">trait</span><span class="o">.</span><span class="n">get_editor</span><span class="p">()</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="o">.</span><span class="n">editor_args</span><span class="p">)</span>
+
+            <span class="c1"># If still no editor factory found, use a default text editor:</span>
+            <span class="k">if</span> <span class="n">editor_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">traitsui.qt4.text_editor</span> <span class="kn">import</span> <span class="n">ToolkitEditorFactory</span>
+                <span class="n">editor_factory</span> <span class="o">=</span> <span class="n">ToolkitEditorFactory</span><span class="p">()</span>
+
+            <span class="c1"># If the item has formatting traits set them in the editor</span>
+            <span class="c1"># factory:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">format_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">editor_factory</span><span class="o">.</span><span class="n">format_func</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">format_func</span>
+
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">format_str</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">editor_factory</span><span class="o">.</span><span class="n">format_str</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">format_str</span>
+
+            <span class="c1"># If the item has an invalid state extended trait name, set it</span>
+            <span class="c1"># in the editor factory:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">invalid</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">editor_factory</span><span class="o">.</span><span class="n">invalid</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">invalid</span>
+
+        <span class="c1"># Create the requested type of editor from the editor factory:</span>
+        <span class="n">factory_method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">editor_factory</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">style</span> <span class="o">+</span> <span class="s1">&#39;_editor&#39;</span><span class="p">)</span>
+        <span class="n">editor</span> <span class="o">=</span> <span class="n">factory_method</span><span class="p">(</span><span class="n">ui</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">tooltip</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">editor</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span>
+            <span class="n">item</span><span class="o">=</span><span class="n">item</span><span class="p">,</span>
+            <span class="n">object_name</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">object</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_editor</span> <span class="o">=</span> <span class="n">editor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ui</span> <span class="o">=</span> <span class="n">ui</span></div>
+
+<div class="viewcode-block" id="TraitsUI.construct"><a class="viewcode-back" href="../../api/bound_editor.html#qt_binder.bound_editor.TraitsUI.construct">[docs]</a>    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span>
+        <span class="n">editor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editor</span>
+        <span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ui</span>
+        <span class="c1"># Tell the editor to actually build the editing widget.  Note that</span>
+        <span class="c1"># &quot;inner&quot; is a layout.  This shouldn&#39;t matter as individual editors</span>
+        <span class="c1"># shouldn&#39;t be using it as a parent anyway.  The important thing is</span>
+        <span class="c1"># that it is not None (otherwise the main TraitsUI code can change</span>
+        <span class="c1"># the &quot;kind&quot; of the created UI object).</span>
+        <span class="n">inner</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">editor</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
+        <span class="n">control</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">control</span>
+
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">style_sheet</span><span class="p">:</span>
+            <span class="n">control</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">style_sheet</span><span class="p">)</span>
+
+        <span class="c1"># Set the initial &#39;enabled&#39; state of the editor from the factory:</span>
+        <span class="n">editor</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">enabled</span>
+
+        <span class="c1"># Give the editor focus if it requested it:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">has_focus</span><span class="p">:</span>
+            <span class="n">control</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+
+        <span class="c1"># We ignore the geometry options of the Item. At least for now.</span>
+
+        <span class="c1"># Bind the editor into the UIInfo object name space so it can be</span>
+        <span class="c1"># referred to by a Handler while the user interface is active:</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="n">ui</span><span class="o">.</span><span class="n">_scrollable</span> <span class="o">|=</span> <span class="n">editor</span><span class="o">.</span><span class="n">scrollable</span>
+
+        <span class="c1"># Also, add the editors to the list of editors used to construct</span>
+        <span class="c1"># the user interface:</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">editor</span><span class="p">)</span>
+
+        <span class="c1"># If the editor is conditionally visible, add the visibility</span>
+        <span class="c1"># &#39;expression&#39; and the editor to the UI object&#39;s list of monitored</span>
+        <span class="c1"># objects:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">visible_when</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">add_visible</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">visible_when</span><span class="p">,</span> <span class="n">editor</span><span class="p">)</span>
+
+        <span class="c1"># If the editor is conditionally enabled, add the enabling</span>
+        <span class="c1"># &#39;expression&#39; and the editor to the UI object&#39;s list of monitored</span>
+        <span class="c1"># objects:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">enabled_when</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">add_enabled</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">enabled_when</span><span class="p">,</span> <span class="n">editor</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qobj</span> <span class="o">=</span> <span class="n">control</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">QtBoundEditor</span><span class="p">(</span><span class="n">Editor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Qt implementation of the ``BoundEditor``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The ``Binder`` object being displayed.</span>
+    <span class="n">binder</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initializes the editor object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">HasPrivateTraits</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">traits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="n">Undefined</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finishes initializing the editor by creating the underlying toolkit</span>
+<span class="sd">        widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">binder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">binder</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">binder</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">TraitsUI</span><span class="p">):</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">initialize_item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
+        <span class="n">binder</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+        <span class="n">binder</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binder</span> <span class="o">=</span> <span class="n">binder</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_context</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">button_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">button_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">button_group</span><span class="o">.</span><span class="n">construct</span><span class="p">()</span>
+            <span class="n">button_group</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+            <span class="n">button_group</span><span class="o">.</span><span class="n">add_buttons_from_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">binding</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">binder</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">configure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">binder</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binder</span><span class="o">.</span><span class="n">qobj</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLayout</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">binder</span><span class="o">.</span><span class="n">qobj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">binder</span><span class="o">.</span><span class="n">qobj</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">stylesheet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">stylesheet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Disposes of the contents of an editor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="n">binding</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">binder</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Break linkages to references we no longer need:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_object</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">update_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates the editor when the object trait changes externally to the</span>
+<span class="sd">        editor.</span>
+
+<span class="sd">        No-op in our case.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_get_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a context for evaluating binding expressions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">button_groups</span><span class="p">)</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">extra_context</span><span class="p">)</span>
+        <span class="c1"># Add any binders with IDs to the context.</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binder</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+                <span class="n">context</span><span class="p">[</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+
+<span class="k">class</span> <span class="nc">BoundEditor</span><span class="p">(</span><span class="n">EditorFactory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Editor for Binder-wrapped Qt widgets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The Binder instance.</span>
+    <span class="n">binder</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">(</span><span class="n">Binder</span><span class="p">)</span>
+
+    <span class="c1">#: The list of ``Bindings``.</span>
+    <span class="n">bindings</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">Instance</span><span class="p">(</span><span class="n">Binding</span><span class="p">))</span>
+
+    <span class="c1">#: Any extra data to put into the context.</span>
+    <span class="n">extra_context</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">()</span>
+
+    <span class="c1">#: A function to call to configure the Binder. It takes two arguments, the</span>
+    <span class="c1">#: root Binder and the dictionary that is used as the context for</span>
+    <span class="c1">#: evaluating the bindings.</span>
+    <span class="n">configure</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">()</span>
+
+    <span class="c1">#: The Qt stylesheet to apply to the root control.</span>
+    <span class="n">stylesheet</span> <span class="o">=</span> <span class="n">Either</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1">#: Mapping of names to `ButtonGroups`.</span>
+    <span class="n">button_groups</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">(</span><span class="n">ButtonGroup</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_get_simple_editor_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtBoundEditor</span>
+
+    <span class="k">def</span> <span class="nf">_get_custom_editor_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtBoundEditor</span>
+
+    <span class="k">def</span> <span class="nf">_get_text_editor_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtBoundEditor</span>
+
+    <span class="k">def</span> <span class="nf">_get_readonly_editor_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtBoundEditor</span>
+
+
+<div class="viewcode-block" id="Bound"><a class="viewcode-back" href="../../api/bound_editor.html#qt_binder.bound_editor.Bound">[docs]</a><span class="k">class</span> <span class="nc">Bound</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convenience ``Item`` for placing a ``Binder`` in a ``View``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binder</span><span class="p">,</span> <span class="o">*</span><span class="n">bindings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">extra_context</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;extra_context&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="s1">&#39;label&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwds</span><span class="p">:</span>
+            <span class="n">kwds</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;show_label&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">configure</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;configure&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">stylesheet</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;stylesheet&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">button_groups</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;button_groups&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="c1"># FIXME: find a better workaround for using `trait_modified`.</span>
+        <span class="c1"># We use it because Traits UI expects *a* trait here. This is one that</span>
+        <span class="c1"># is unlikely to appear elsewhere in Traits UIs. Fortunately, it is one</span>
+        <span class="c1"># that every `HasTraits` class already has, and it is an `Event`, which</span>
+        <span class="c1"># prevents Traits UI from trying to get its value.</span>
+        <span class="n">parsed_bindings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">Binding</span><span class="o">.</span><span class="n">parse</span><span class="p">,</span> <span class="n">bindings</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Bound</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="s1">&#39;trait_modified&#39;</span><span class="p">,</span>
+            <span class="n">editor</span><span class="o">=</span><span class="n">BoundEditor</span><span class="p">(</span>
+                <span class="n">binder</span><span class="o">=</span><span class="n">binder</span><span class="p">,</span>
+                <span class="n">bindings</span><span class="o">=</span><span class="n">parsed_bindings</span><span class="p">,</span>
+                <span class="n">extra_context</span><span class="o">=</span><span class="n">extra_context</span><span class="p">,</span>
+                <span class="n">configure</span><span class="o">=</span><span class="n">configure</span><span class="p">,</span>
+                <span class="n">stylesheet</span><span class="o">=</span><span class="n">stylesheet</span><span class="p">,</span>
+                <span class="n">button_groups</span><span class="o">=</span><span class="n">button_groups</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;</span><span class="si">{0.__name__}</span><span class="s1">(&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
+            <span class="s1">&#39;    </span><span class="si">{0!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">binder</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__str__</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;    &#39;</span><span class="si">{0}</span><span class="s2">&#39;,&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binding</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    </span><span class="si">{0!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binding</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">configure</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    configure=</span><span class="si">{0.configure!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">extra_context</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    extra_context=</span><span class="si">{0.extra_context!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">button_groups</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    button_groups=</span><span class="si">{0.button_groups!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_label</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    label=</span><span class="si">{0.label!r}</span><span class="s1">,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>qt_binder.raw_widgets &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../_static/css/spc-extend.css">
+    <link rel="stylesheet" href="../_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="../_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="../_static/img/favicon.png">
+    <link rel="index" title="Index" href="../genindex.html" >
+    <link rel="search" title="Search" href="../search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="../index.html" >
+    <link rel="up" title="API Reference" href="index.html" >
+    <link rel="next" title="qt_binder.type_registry" href="type_registry.html" >
+    <link rel="prev" title="qt_binder.bound_editor" href="bound_editor.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="../index.html">QtBinder 0.3 documentation</a></li>
+	
+          <li class="active"><a href="index.html" accesskey="U">API Reference</a></li> 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="../genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="../py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="type_registry.html" title="qt_binder.type_registry"
+           accesskey="N">next</a>
+      </li>
+      <li class="active">
+        <a href="bound_editor.html" title="qt_binder.bound_editor"
+           accesskey="P">previous</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="qt-binder-raw-widgets">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">qt_binder.raw_widgets</span></code><a class="headerlink" href="#qt-binder-raw-widgets" title="Permalink to this headline">¶</a></h1>
+<p>Mostly automated wrappers around all of the <code class="docutils literal notranslate"><span class="pre">QWidgets</span></code> and <code class="docutils literal notranslate"><span class="pre">QLayouts</span></code> provided
+in <a class="reference external" href="http://pyside.github.io/docs/pyside/PySide/QtGui/index.html#module-PySide.QtGui" title="(in PySide v1.2.1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PySide.QtGui</span></code></a>. Generally, the <a class="reference internal" href="binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> is named by dropping the
+leading <code class="docutils literal notranslate"><span class="pre">Q</span></code>. Only a few of these are minimally customized when it is necessary
+to make them useful. Only those are documented here. The <a class="reference external" href="http://doc.qt.io/qt-4.8/qtgui-module.html">Qt API
+reference</a> should be consulted
+for details of what properties, signals, and slots are defined.</p>
+<hr class="docutils" />
+<dl class="data">
+<dt id="qt_binder.raw_widgets.binder_registry">
+<code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">binder_registry</code><a class="headerlink" href="#qt_binder.raw_widgets.binder_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>The global <a class="reference internal" href="type_registry.html#qt_binder.type_registry.TypeRegistry" title="qt_binder.type_registry.TypeRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeRegistry</span></code></a> mapping PySide/PyQt types to their default <a class="reference internal" href="binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>
+class.</p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.ComboBox">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">ComboBox</code><span class="sig-paren">(</span><em>*args</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#ComboBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.ComboBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="binder.html#qt_binder.binder.Composite" title="qt_binder.binder.Composite"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.Composite</span></code></a></p>
+<p>Customized to exposed the line-edit widget as a child
+<a class="reference internal" href="binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a>.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.ComboBox.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.ComboBox.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QComboBox</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.ComboBox.lineEdit_class">
+<code class="descname">lineEdit_class</code><a class="headerlink" href="#qt_binder.raw_widgets.ComboBox.lineEdit_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">LineEdit</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.Layout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">Layout</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#Layout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.Layout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="binder.html#qt_binder.binder.NChildren" title="qt_binder.binder.NChildren"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.NChildren</span></code></a></p>
+<p>Base class for all <code class="docutils literal notranslate"><span class="pre">QLayouts</span></code>.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.Layout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.Layout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QLayout</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.Layout.construct">
+<code class="descname">construct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#Layout.construct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.Layout.construct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the QLayout.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.BoxLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">BoxLayout</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#BoxLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.BoxLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.raw_widgets.Layout" title="qt_binder.raw_widgets.Layout"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.raw_widgets.Layout</span></code></a></p>
+<p>Base class for box layouts.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.BoxLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.BoxLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QBoxLayout</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.BoxLayout.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#BoxLayout.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.BoxLayout.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.VBoxLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">VBoxLayout</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#VBoxLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.VBoxLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.raw_widgets.BoxLayout" title="qt_binder.raw_widgets.BoxLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.raw_widgets.BoxLayout</span></code></a></p>
+<p>A vertical layout.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.VBoxLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.VBoxLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QVBoxLayout</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.HBoxLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">HBoxLayout</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#HBoxLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.HBoxLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.raw_widgets.BoxLayout" title="qt_binder.raw_widgets.BoxLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.raw_widgets.BoxLayout</span></code></a></p>
+<p>A horizontal layout.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.HBoxLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.HBoxLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QHBoxLayout</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.StackedLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">StackedLayout</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#StackedLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.StackedLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.raw_widgets.Layout" title="qt_binder.raw_widgets.Layout"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.raw_widgets.Layout</span></code></a></p>
+<p>A stacked layout.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.StackedLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.StackedLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QStackedLayout</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.StackedLayout.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#StackedLayout.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.StackedLayout.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.FormLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">FormLayout</code><span class="sig-paren">(</span><em>*rows</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#FormLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.FormLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qt_binder.raw_widgets.Layout" title="qt_binder.raw_widgets.Layout"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.raw_widgets.Layout</span></code></a></p>
+<p>Children are (label, widget) pairs.</p>
+<p>The label can be a <code class="docutils literal notranslate"><span class="pre">unicode</span></code> string or <code class="docutils literal notranslate"><span class="pre">None</span></code>. The last item can be
+a single <code class="docutils literal notranslate"><span class="pre">Binder</span></code> to take up the whole space.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.FormLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.FormLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QFormLayout</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.FormLayout.rows">
+<code class="descname">rows</code><em class="property"> = List(Either(Tuple(Either(None, Unicode, Instance(Binder)), Instance(Binder)
+    ), Instance(Binder)))</em><a class="headerlink" href="#qt_binder.raw_widgets.FormLayout.rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (label, widget) pairs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.FormLayout.child_binders">
+<code class="descname">child_binders</code><em class="property"> = Property(List(Instance(Binder)))</em><a class="headerlink" href="#qt_binder.raw_widgets.FormLayout.child_binders" title="Permalink to this definition">¶</a></dt>
+<dd><p>The child <code class="docutils literal notranslate"><span class="pre">Binder</span></code> instances.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.FormLayout.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#FormLayout.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.FormLayout.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.WithLayout">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">WithLayout</code><span class="sig-paren">(</span><em>layout</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#WithLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.WithLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="binder.html#qt_binder.binder.Composite" title="qt_binder.binder.Composite"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.Composite</span></code></a></p>
+<p>A dumb <code class="docutils literal notranslate"><span class="pre">QWidget</span></code> wrapper with a child <code class="docutils literal notranslate"><span class="pre">Layout</span></code>.</p>
+<p>This is needed in some places where a true <code class="docutils literal notranslate"><span class="pre">QWidget</span></code> is needed instead of
+a <code class="docutils literal notranslate"><span class="pre">QLayout</span></code>.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.WithLayout.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.WithLayout.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QWidget</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.WithLayout.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#WithLayout.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.WithLayout.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.Splitter">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">Splitter</code><span class="sig-paren">(</span><em>*children</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#Splitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.Splitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="binder.html#qt_binder.binder.NChildren" title="qt_binder.binder.NChildren"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.NChildren</span></code></a></p>
+<p>A splitter widget for arbitrary numbers of children.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.Splitter.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.Splitter.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QSplitter</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.Splitter.construct">
+<code class="descname">construct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#Splitter.construct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.Splitter.construct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the QLayout.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.Splitter.configure">
+<code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#Splitter.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.Splitter.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do any configuration of the <code class="docutils literal notranslate"><span class="pre">qobj</span></code> that is needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="class">
+<dt id="qt_binder.raw_widgets.ButtonGroup">
+<em class="property">class </em><code class="descclassname">qt_binder.raw_widgets.</code><code class="descname">ButtonGroup</code><span class="sig-paren">(</span><em>*button_ids</em>, <em>**traits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#ButtonGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.ButtonGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">qt_binder.binder.Binder</span></code></a></p>
+<p>A group of buttons.</p>
+<p>This is a special <code class="docutils literal notranslate"><span class="pre">Binder</span></code> used in the <code class="docutils literal notranslate"><span class="pre">button_groups=</span></code> keyword to <code class="docutils literal notranslate"><span class="pre">Bound</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ButtonGroup</span></code> is not a widget, so it does not get put into the widget
+hierarchy. It is given the ID strings of the button <code class="docutils literal notranslate"><span class="pre">Binders</span></code> that belong
+to the group.</p>
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.ButtonGroup.qclass">
+<code class="descname">qclass</code><a class="headerlink" href="#qt_binder.raw_widgets.ButtonGroup.qclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PySide2.QtWidgets.QButtonGroup</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qt_binder.raw_widgets.ButtonGroup.button_ids">
+<code class="descname">button_ids</code><em class="property"> = List(Either(Str, Tuple(Str, Int)))</em><a class="headerlink" href="#qt_binder.raw_widgets.ButtonGroup.button_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of <code class="docutils literal notranslate"><span class="pre">Binder</span></code> ID strings or <code class="docutils literal notranslate"><span class="pre">(binder_id_str,</span> <span class="pre">qt_id_int)</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qt_binder.raw_widgets.ButtonGroup.add_buttons_from_context">
+<code class="descname">add_buttons_from_context</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qt_binder/raw_widgets.html#ButtonGroup.add_buttons_from_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qt_binder.raw_widgets.ButtonGroup.add_buttons_from_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pull out the required buttons from the context and add them.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bound_editor.html"
+                        title="previous chapter"><code class="docutils literal notranslate"><span class="pre">qt_binder.bound_editor</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="type_registry.html"
+                        title="next chapter"><code class="docutils literal notranslate"><span class="pre">qt_binder.type_registry</span></code></a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="../_sources/api/raw_widgets.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

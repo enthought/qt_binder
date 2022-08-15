@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>Core Principles &mdash; QtBinder 0.3 documentation</title>
+    
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="_static/css/spc-extend.css">
+    <link rel="stylesheet" href="_static/enthought.css" type="text/css" >
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" >
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        LINK_SUFFIX: '',
+        SOURCELINK_SUFFIX: '.txt',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="_static/js/wrap_on_dot.js"></script>
+    <link rel="shortcut icon" href="_static/img/favicon.png">
+    <link rel="index" title="Index" href="genindex.html" >
+    <link rel="search" title="Search" href="search.html" >
+    <link rel="top" title="QtBinder 0.3 documentation" href="index.html" >
+    <link rel="next" title="Traits UI Integration" href="traits_ui.html" >
+    <link rel="prev" title="Welcome to QtBinder!" href="index.html" > 
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+    </div>
+  </div>
+
+    <div class="container">
+      <div class="main">
+        
+	<div class="row-fluid">
+	  <div class="span12">
+	    <div class="spc-navbar">
+              
+    <ul class="nav nav-pills pull-left">
+	
+        <li class="active"><a href="index.html">QtBinder 0.3 documentation</a></li>
+	 
+    </ul>
+              
+              
+    <ul class="nav nav-pills pull-right">
+      <li class="active">
+        <a href="genindex.html" title="General Index"
+           accesskey="I">index</a>
+      </li>
+      <li class="active">
+        <a href="py-modindex.html" title="Python Module Index"
+           >modules</a>
+      </li>
+      <li class="active">
+        <a href="traits_ui.html" title="Traits UI Integration"
+           accesskey="N">next</a>
+      </li>
+      <li class="active">
+        <a href="index.html" title="Welcome to QtBinder!"
+           accesskey="P">previous</a>
+      </li>
+    </ul>
+              
+	    </div>
+	  </div>
+	</div>
+        
+
+	<div class="row-fluid">
+          <div class="span9">
+            
+        <div class="bodywrapper">
+          <div class="body" id="spc-section-body" role="main">
+            
+  <div class="section" id="core-principles">
+<span id="id1"></span><h1>Core Principles<a class="headerlink" href="#core-principles" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic simple" id="value-added">
+<li><strong>Value-added wrapping</strong>: Custom <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> classes should only manually wrap
+the Qt API when it adds value. For example, translating Qt enums one-to-one
+to an ad hoc toolkit-neutral form does not add value. <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> can
+automatically wrap all Qt properties, signals, and slots. This means that
+a user of the custom subclass can access everything that the Qt widget
+exposes even if the author did not think to expose it. Value-added wrapping
+encapsulates patterns of communication and coordinates multiple moving
+pieces internal to the widget to expose a bindable Traits API.</li>
+<li><strong>Thin, transparent wrapping</strong>: This is a library for <em>using</em> Qt to build
+UIs, not hide it behind a toolkit-neutral abstraction.</li>
+<li><strong>Small core</strong>: The core should remain tiny so that it can be understood and
+traced through by users of QtBinder who are debugging their code.</li>
+<li><strong>Graded transition from Traits UI</strong>: <a class="reference internal" href="api/bound_editor.html#qt_binder.bound_editor.Bound" title="qt_binder.bound_editor.Bound"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bound</span></code></a> is a straightforward
+Traits UI <code class="docutils literal notranslate"><span class="pre">Item</span></code> that can be used wherever any other <code class="docutils literal notranslate"><span class="pre">Item</span></code> could be used in
+Traits UI. It can be used in a very focused manner to fix one or two places
+where the extra flexibility of QtBinder is necessary and ignored elsewhere.
+It can also be used to provide the whole <code class="docutils literal notranslate"><span class="pre">View</span></code> when desired. Use of
+QtBinder should not be held up because we have not added enough value-added
+widgets yet.</li>
+<li><strong>Bind to existing instances</strong>: All <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> classes can either instantiate
+their underlying <code class="docutils literal notranslate"><span class="pre">QWidget</span></code> or be provided an existing one. This allows us to
+lay out an entire UI in Qt Designer, instantiate it from the <code class="docutils literal notranslate"><span class="pre">.ui</span></code> file,
+then attach the desired <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> to individual widgets inside of it.</li>
+<li><strong>Do one thing well</strong>: Custom <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> subclasses should attempt to
+encapsulate one particular pattern of using their wrapped widget. It should
+not try to switch between different patterns based on configuration (unless
+if the intended pattern requires that the widget switch behaviors live). The
+logic needed to synchronize the widget state with the model state can
+sometimes get hairy. Dealing with multiple patterns conditionally
+complicates this part of the code, which makes it harder to customize for
+new purposes.</li>
+<li><strong>Pay for what you use</strong>: <a class="reference internal" href="api/binder.html#qt_binder.binder.Binder" title="qt_binder.binder.Binder"><code class="xref py py-class docutils literal notranslate"><span class="pre">Binder</span></code></a> wraps all Qt signals, but it will only
+connect to them and incur the cost of converting the signal values to Python
+objects when a Traits listener is attached to the signal trait.</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+          </div>
+      <div class="spc-rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/img/e-logo.png" alt="Logo">
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to QtBinder!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="traits_ui.html"
+                        title="next chapter">Traits UI Integration</a></p>
+  <h3>This Page</h3>
+  <div>
+    <a href="_sources/principles.rst.txt"
+       rel="nofollow">Show Source</a>
+  </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container-navbar-bottom">
+      <div class="spc-navbar">
+        
+      </div>
+    </div>
+    <div class="container">
+    <div class="footer">
+    <div class="row-fluid">
+    <ul class="inline pull-left">
+      <li>
+        &copy; Copyright 2014-2019, Enthought, Inc.
+      </li>
+      <li>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.8.6.
+      </li>
+    </ul>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>
